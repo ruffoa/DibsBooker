@@ -1,0 +1,39 @@
+.yroom,
+.ytime {
+    background-color: #a5c25c;
+}
+
+.nroom,
+.ntime {
+    background-color: #cc7832;
+}
+
+.mtime {
+    background-color: #769aa5;
+}
+
+body {
+    background-color: #272822 !important;
+    color: whitesmoke !important;
+}
+
+.card-block {
+    color: black;
+}
+
+.page-header .btn-default {
+    color: whitesmoke !important;
+}
+
+.navbar {
+    background-color: #992CC4 !important;
+}
+
+.mission-control, .modal,
+.btn-default, .list-group li {
+    color: #000;
+}
+
+object {
+    background-color: whitesmoke;
+}

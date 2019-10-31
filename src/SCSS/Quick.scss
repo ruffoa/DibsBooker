@@ -1,0 +1,17 @@
+.quick {
+
+  &__card-container {
+    padding: 0;
+
+    @media screen and (min-width: $medium-breakpoint) {
+      padding: 0 30px;
+    }
+  }
+
+  @include cardStyles;
+
+  .snack-bar &__error-alert {
+    max-width: 650px;
+  }
+}
+

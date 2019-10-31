@@ -1,0 +1,26 @@
+{
+  "short_name": "QBook",
+  "name": "QBook",
+  "icons": [
+    {
+      "src": "/img/qlogo.png",
+      "type": "image/png",
+      "sizes": "650×440"
+    },
+    {
+      "src": "/img/qbook-144.png",
+      "type": "image/png",
+      "sizes": "144×144"
+    },
+    {
+      "src": "/img/qbook-512.png",
+      "type": "image/png",
+      "sizes": "512×512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#673ab7",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#673ab7"
+}

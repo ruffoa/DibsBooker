@@ -1,0 +1,25 @@
+$assetPath : "/img";
+
+#main.with-background {
+  background-image: url("#{$assetPath}/ilc.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.signup {
+
+  &__card-container {
+    padding: 0;
+
+    @media screen and (min-width: $medium-breakpoint) {
+      padding: 0 30px;
+    }
+  }
+
+  @include cardStyles;
+
+  .snack-bar &__error-alert {
+    max-width: 650px;
+  }
+}
+
