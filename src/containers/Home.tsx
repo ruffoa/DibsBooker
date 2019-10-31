@@ -120,7 +120,7 @@ class Home extends Component<Props, State> {
   renderTimeButtons() {
     const { roomData, selectedTime, prettyDate, intDay } = this.state;
     const dbTime = selectedTime - 7;
-    console.log(dbTime, roomData, selectedTime, prettyDate, intDay)
+    console.log(dbTime, roomData, selectedTime, prettyDate, intDay, this.state)
 
     const roomButtons = roomData && roomData.map((room) => {
       let className = 'nroom';
@@ -214,7 +214,7 @@ class Home extends Component<Props, State> {
 
   async onTimeChange(event) {
     const selectedValue = event.target.value;
-    const intVal = selectedValue !== '' ? parseInt(selectedValue) : null;
+    const intVal = selectedValue !== '' ? parseInt(selectedValue) : this.state.currentHour;
     const { selectedDate, roomData, intDay } = this.state;
 
     if (!roomData[0].Free[intDay]) {
@@ -228,7 +228,9 @@ class Home extends Component<Props, State> {
         timeCount: (res as RoomPostData).timeCount || this.state.timeCount
       });
     } else {
+
       this.setState({
+        selectedTime: intVal,
         currentHour: intDay === 0 ? sanitiseTime(new Date().getHours(), true) : this.state.currentHour
       });
     }

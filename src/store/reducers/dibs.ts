@@ -51,10 +51,10 @@ export default async function dibsReducer(state: DibsState = initialState, actio
   const {type, payload} = action;
 
   if (type === DibsActionType.BookDibsRoom) {
-    const res = await tryToBook(payload);
+    const res = await tryToBook(payload as DibsBookingPayload);
     return {
       ...state,
-      bookings: [...state.bookings, {...payload, bookingInfo: "", bookingStatus: false}]
+      bookings: [...state.bookings, { bookingInfo: "", bookingStatus: false}]
     };
   }
 

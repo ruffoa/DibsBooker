@@ -1,9 +1,14 @@
 export const room_booking_limit = 4;
 export const room_hour_limit = 12;
 export const per_room_limit = 5;
+export const day_length = 16;
+export const start_hour = 7;
 export const userVersion = 4;
+export const max_days_to_book_ahead = 14;
+
 export const fromEmail = "no-reply@engsoc.queensu.ca";
 export const dibsVersion = "1.1.23";
+
 // export const hostName = "localhost:8080"
 export const newFeatures =
     '<p>Improvements Included in Version 1.1.25 (5/3/2018):  General system stability improvements to enhance the user\'s experience, plus added new QuickBook™ feature to Automagically™ book a open room</p>\n' +

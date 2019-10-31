@@ -50,14 +50,14 @@ export async function getListOfRoomState(day: number, time: number, usrid: numbe
         room: roomData.Name,
         roomNum: mapRoomName,
         roomID: listRoomName,
-        Free: generateFreeTable(roomData.Free.last, 16),
+        Free: generateFreeTable(roomData.Free.length, 16),
         size: roomData.size,
         hasTV: roomData.tv,
         hasPhone: roomData.phone,
         id: roomData.RoomID,
         Picture: roomData.Picture
       });
-    } else if (time == -1) {
+    } else if (time == -1) {  // give us the free table for EVERY day
       listFree.push({
         room: roomData.Name,
         roomNum: mapRoomName,
@@ -176,14 +176,14 @@ function createNewFreeTable(length: number, isFree: boolean): Array<RoomFreeTabl
   return newFreeTable;
 }
 
-export function generateFreeTable(days: number, dayLength: number): Array<Array<RoomFreeTable>> {
+export function generateFreeTable(days: number, dayLength: number, isFree: boolean = false): Array<Array<RoomFreeTable>> {
   const newFreeTable: Array<Array<RoomFreeTable>> = new Array(days);
   for (let j = 0; j < days; j++) {
     const curDay: Array<RoomFreeTable> = new Array(dayLength);
 
     for (let i = 0; i < dayLength; i++) {
       curDay[i] = {
-        free: false,
+        free: isFree,
         time: ((7 + i) >= 10 ? (7 + i) : '0' + (7 + i)) + ':30 - ' + ((8 + i) >= 10 ? (8 + i) : '0' + (8 + i)) + ':30',
         startTime: 7 + i,
         owner: 0,

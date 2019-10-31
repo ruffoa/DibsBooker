@@ -12,6 +12,22 @@ export interface DibsBookingPayload {
   startTime: number;
 }
 
+export interface DibsRoomHours {
+  EndTime: string;
+  RoomID: number;
+  SpaceName: string;
+  StartTime: string;
+}
+
+export interface DibsRoom {
+  BuildingID: number;
+  Description: string;
+  Map: string;
+  Name: string;
+  Picture: string;
+  RoomID: number;
+}
+
 export interface Booking extends DibsBookingPayload{
   bookingInfo: string;
   bookingStatus: boolean;
@@ -25,5 +41,5 @@ export interface DibsState {
 
 export interface DibsAction {
   type: DibsActionType;
-  payload: DibsBookingPayload;
+  payload: DibsBookingPayload | Array<Room> | Array<DibsRoom>;
 }

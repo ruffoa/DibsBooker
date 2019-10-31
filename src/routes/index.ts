@@ -10,12 +10,15 @@ import { compile } from '../server/compileSass';
 import { UserAccountType } from '../types/enums/user';
 import { getDaysFromToday } from '../lib/dateFuncs';
 import { getTimecount } from '../lib/roomBooking';
+import {getDibsBookingsForAllRooms} from "../store/actions/dibs";
+import {Room} from "../types/room";
 
 const express = require('express');
 const router = express.Router();
 
 async function createStoreInstance(req, data, current_hour, timeCount) {
   const store = createStore({});
+
   await store.dispatch(setRooms(data));
   await store.dispatch(setCurrentHour(current_hour));
   await store.dispatch(setTimeCount(timeCount));
@@ -40,7 +43,9 @@ router.get('/', async function (req, res, next) {
   const userid = getUserID(req);
 
   const listFree = await getListOfRoomState(day, -1, userid);
-  const timecount = getTimecount(day, userid, current_hour, listFree);
+
+  const dibsFree = await getDibsBookingsForAllRooms(listFree, 0);
+  const timecount = getTimecount(day, userid, current_hour, dibsFree.payload);
 
   const store = await createStoreInstance(req, listFree, current_hour, timecount);
   const context = {};
@@ -88,7 +93,9 @@ router.post('/index', async function (req, res) {
     const usrid = getUserID(req);
 
     const listFree = await getListOfRoomState(daysFromToday, -1, usrid);
-    console.log('getting data for: ', daysFromToday, current_hour);
+    const dibsFree = await getDibsBookingsForAllRooms(listFree, daysFromToday);
+
+    console.log('getting data for: ', daysFromToday, current_hour, listFree.length, (dibsFree.payload as Room[]).length);
     const timeCount = getTimecount(daysFromToday, usrid, 7, listFree);
     const prettyDate = formatDate(postDataDate);
 
