@@ -1,4 +1,3 @@
-import router from "../routes";
 import {max_days_to_book_ahead} from "../../config/config";
 
 export function getPrettyHour(hour: number, showAmPm: boolean = false): string {
@@ -60,7 +59,7 @@ export function getPrettyDay(intDay: number, fullString: boolean = false): strin
 
 export function getDateFromIntDayTime(intDay: number, time: number): string {
   const today = new Date();
-  today.setTime(today.getTime() + (intDay + 1) * 24 * 60 * 60 * 1000);
+  today.setTime(today.getTime() + (intDay) * 24 * 60 * 60 * 1000);
   today.setHours(time);
 
   const month = (today.getMonth() < 10 ? '0' : '') + (today.getMonth() + 1).toString();

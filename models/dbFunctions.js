@@ -62,12 +62,12 @@ export function endOfDayShift() {
 
 function checkAdminDB() {
   adminFuncs.getAll().then(function (rooms) {
-    for (var room of rooms) {
+    for (const room of rooms) {
       adminFuncs.getInRange(room.RoomID).then(function (ranges, err) {
         for (var range of ranges) {
           roomBook.bookMultiple(range.start, range.hours, range.roomID, "admin", undefined).then(function (data) {
             console.log("A schedule is in range, booking rooms...");
-            console.log(data);
+            // console.log(data);
           });
         }
       });

@@ -5,6 +5,7 @@ const srcPath = path.resolve(__dirname, '../');
 const env = process.env.NODE_ENV === 'dev' ? 'development' : 'production';
 
 const isProduction = env === 'production';
+console.log("NODE ENV = ", env, process.env.NODE_ENV)
 
 module.exports = {
   mode: env,

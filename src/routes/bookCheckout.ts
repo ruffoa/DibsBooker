@@ -1,28 +1,46 @@
 import express from 'express';
 import { getUserID } from '../lib/userFunctions';
 import { bookMultiple, bookMultipleByName } from '../lib/roomBooking';
+import {bookDibsRoom} from "../store/actions/dibs";
+import {DibsMultipleBookingPayload} from "../types/dibs";
+import {tryToBook} from "../lib/serverSideDibsFuncs";
 
 const router = express.Router();
 router.post('/bookroom', async function (req, res) { // similar to the book function with a few changes which will be commented below
   console.log('got the post! ', req.body);
   const roomToBook = JSON.stringify(req.body);
-  const postData = JSON.parse(roomToBook);
+  const postData: DibsMultipleBookingPayload = JSON.parse(roomToBook);
 
-  const roomName = postData.roomName;
+  const { times, room, day, userInfo } = postData;
+
+  const combinedTimes = [];
+
+  let lastTime = 0;
+
+  times.map((time) => {
+    if (lastTime === time - 1)
+      combinedTimes[combinedTimes.length - 1] = ({ time, length: combinedTimes[combinedTimes.length - 1].length + 1 });
+    else
+      combinedTimes.push({ time, length: 1 });
+  });
+
+  console.log("CALCULATED TIMES ARE: ", JSON.stringify(combinedTimes));
   const usrid = getUserID(req);
-  const day = parseInt(postData.day, 10);
-  const times = Array.isArray(postData.times) ? postData.times : [postData.times]; // get the array of times sent over (instead of a singular one)
-  console.log('post: ', roomName, usrid, day, times);
+
   if (usrid === -1 || usrid === undefined) {
     req.flash('bookingMessage', roomToBook);
     res.send({
       HeaderMsg: 'You must login',
-      BookingStatusMsg: roomName + '-' + times[0] + '-' + 1 + '-' + day,
+      BookingStatusMsg: room.room + '-' + times[0] + '-' + 1 + '-' + day,
       BookStatus: false
     });
   } else {
     console.log('booking');
-    await book(day, times, roomName, usrid, req, res); // the function to book the room
+    // await bookDibsRoom()
+    // await book(day, times, roomName, usrid, req, res); // the function to book the room
+
+    const data = await tryToBook({ startTime: combinedTimes[0].time, reservationLength: combinedTimes[0].length, startDate: day, lastName: userInfo.lastName, firstName: userInfo.firstName, emailAddress: userInfo.email, phoneNumber: userInfo.phoneNumber, room })
+    res.send({ HeaderMsg: data.header, BookingStatusMsg: data.bookMsg, BookStatus: data.success });
   }
 });
 

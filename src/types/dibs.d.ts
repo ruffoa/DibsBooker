@@ -1,5 +1,6 @@
 import {DibsActionType} from "./enums/dibs";
 import {Room} from "./room";
+import {UserInfo} from "./user";
 
 export interface DibsBookingPayload {
   room: Room;
@@ -10,6 +11,13 @@ export interface DibsBookingPayload {
   reservationLength: number;
   startDate: number;
   startTime: number;
+}
+
+export interface DibsMultipleBookingPayload {
+  room: Room;
+  times: Array<number>;
+  day: number;
+  userInfo: UserInfo;
 }
 
 export interface DibsRoomHours {
@@ -37,6 +45,7 @@ export interface DibsState {
   bookingStatus: boolean;
   bookingInfo: string;
   bookings: Array<Booking>;
+  rooms: Array<DibsRoom>
 }
 
 export interface DibsAction {

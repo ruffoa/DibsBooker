@@ -1,6 +1,6 @@
 import { StoreState } from '../types/store';
 import { selectCurrentHour, selectRoomData, selectTimeCount } from '../store/selectors/rooms';
-import { selectIsLoggedIn } from '../store/selectors/user';
+import {selectIsLoggedIn, selectUserInfo} from '../store/selectors/user';
 import { connect } from 'react-redux';
 import * as React from 'react';
 import { Room, RoomFreeTable } from '../types/room';
@@ -12,6 +12,9 @@ import postReq from '../client/postReq';
 import SnackBar, { SnackBarVariant } from '../components/SnackBar';
 import { BookingResponseObject } from '../types/book';
 import { RouteComponentProps } from 'react-router';
+import {bookDibsRoom, bookMultipleDibsRoom} from "../store/actions/dibs";
+import {Dispatch} from "redux";
+import {UserInfo} from "../types/user";
 
 async function fetchData(roomID) {
   if (roomID) {
@@ -30,6 +33,9 @@ interface Props extends RouteComponentProps<MatchParams> {
   isLoggedIn: boolean;
   roomData: Array<Room>;
   day: string;
+  bookDibsRoom: Dispatch;
+  bookMultipleDibsRooms: Dispatch;
+  userInfo: UserInfo;
 }
 
 interface State {
@@ -91,17 +97,31 @@ class Book extends React.Component<Props, State> {
   }
 
   bookRoom = async () => {
-    const { selectedTimes, roomData, roomName, day } = this.state;
+    const { selectedTimes, roomData, roomName: stateRoomName, day } = this.state;
+    const { userInfo } = this.props;
 
     if (selectedTimes.length) {
       console.log('selectedTimes: ', selectedTimes.toString());
 
-      const roomName = roomData && roomData[0].room || roomName;
+      const roomName = roomData && roomData[0].room || stateRoomName;
       const serverResponse = await postReq('/bookroom', {
         times: selectedTimes,
         roomName,
-        day
+        day,
+        room: roomData && roomData[0],
+        userInfo
       }) as BookingResponseObject;
+
+      //  room: Room;
+      //   emailAddress: string;
+      //   firstName: string;
+      //   lastName: string;
+      //   phoneNumber?: string;
+      //   reservationLength: number;
+      //   startDate: number;
+      //   startTime: number;
+
+      // bookMultipleDibsRoom({ times: selectedTimes, day, room: roomData && roomData[0], userInfo });
       console.log('serverResponse: ', serverResponse);
 
       if (serverResponse.BookStatus) {
@@ -142,7 +162,6 @@ class Book extends React.Component<Props, State> {
     const { roomData } = this.state;
 
     console.log('logged in?: ', this.props.isLoggedIn);
-    console.log(this.props, this.state);
 
     await this.buildRoomData();
   }
@@ -191,7 +210,7 @@ class Book extends React.Component<Props, State> {
     return (
       <Grid item>
         <div className='section'>
-          <Grid container spacing={16}>
+          <Grid container spacing={2}>
             {hourButtons}
           </Grid>
         </div>
@@ -213,7 +232,7 @@ class Book extends React.Component<Props, State> {
         <Typography>
           {Description}
         </Typography>
-        <Grid container spacing={8}>
+        <Grid container spacing={1}>
           <Grid item>
             {hasTV && <TvRounded className="book__feature-icon" />}
           </Grid>
@@ -235,7 +254,6 @@ class Book extends React.Component<Props, State> {
     if (!roomData.length)
       return null;
 
-    console.log('room0', roomData[0], roomData);
     const { room: roomName, Picture } = roomData[0];
 
     return (
@@ -253,7 +271,7 @@ class Book extends React.Component<Props, State> {
                   Book {roomName} for {day || getPrettyDay(0, true)}
                 </Typography>
                 {this.renderRoomInfo()}
-                <Grid container spacing={16} alignContent={'center'}>
+                <Grid container spacing={2} alignContent={'center'}>
                   {this.renderTimeButtons()}
                 </Grid>
               </CardContent>
@@ -273,13 +291,22 @@ class Book extends React.Component<Props, State> {
 
 }
 
+const mapDispatchToProps = dispatch => {
+  return {
+    bookDibsRoom: () => dispatch(bookDibsRoom),
+    bookMultipleDibsRooms: () => dispatch(bookMultipleDibsRoom),
+    dispatch
+  }
+};
+
 function mapStateToProps(state: StoreState) {
   return {
     roomData: selectRoomData(state),
     currentHour: selectCurrentHour(state),
     timeCount: selectTimeCount(state),
-    isLoggedIn: selectIsLoggedIn(state)
+    isLoggedIn: selectIsLoggedIn(state),
+    userInfo: selectUserInfo(state),
   };
 }
 
-export default connect(mapStateToProps)(Book);
+export default connect(mapStateToProps, mapDispatchToProps)(Book);

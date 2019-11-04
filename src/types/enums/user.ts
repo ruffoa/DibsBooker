@@ -1,7 +1,8 @@
 export enum UserActionType {
   SetAccountType = "SetAccountType",
   SetUserData = 'SetUserData',
-  SetLoggedIn = 'SetLoggedIn'
+  SetLoggedIn = 'SetLoggedIn',
+  SetUser = 'SetUser'
 }
 
 export enum UserAccountType {

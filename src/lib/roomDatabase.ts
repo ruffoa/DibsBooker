@@ -27,7 +27,6 @@ export async function getAllFreeNow() {
     out[data.Name].id = data.RoomID;
   });
 
-  console.log(data, 'out= ', out);
   return data;
 }
 

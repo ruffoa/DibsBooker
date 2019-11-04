@@ -1,12 +1,5 @@
-import {DibsAction, DibsBookingPayload, DibsRoomHours} from "../../types/dibs";
+import {DibsAction, DibsBookingPayload, DibsMultipleBookingPayload } from "../../types/dibs";
 import {DibsActionType} from "../../types/enums/dibs";
-import * as httpm from 'typed-rest-client/HttpClient';
-import rooms from "../reducers/rooms";
-import {Room} from "../../types/room";
-import {convertDibsTimesToQBookTimes} from "../../lib/dibsFuncs";
-import {getDibsDayStrFromIntDay} from "../../lib/dateFuncs";
-
-let httpc: httpm.HttpClient = new httpm.HttpClient('vsts-node-api');
 
 export function bookDibsRoom(payload: DibsBookingPayload): DibsAction {
   return {
@@ -15,62 +8,31 @@ export function bookDibsRoom(payload: DibsBookingPayload): DibsAction {
   };
 }
 
-export async function getDibsRooms(): Promise<DibsAction> {
-  const res = await (await httpc.get('https://queensu.evanced.info/dibsapi/rooms')).readBody();
-  let payload = [];
+export function bookMultipleDibsRoom(payload: DibsMultipleBookingPayload): DibsAction {
+  const { times, room, day, userInfo } = payload;
 
-  try {
-    payload = JSON.parse(res)
-  } catch (e) {
-    console.error("Error at getDibsRooms action: ", e);
-  }
+  const combinedTimes = [];
+
+  let lastTime = 0;
+
+  times.map((time) => {
+    if (lastTime === time - 1)
+      combinedTimes[combinedTimes.length - 1] = ({ time, length: combinedTimes[combinedTimes.length - 1].length + 1 });
+    else
+      combinedTimes.push({ time, length: 1 });
+  });
+
+  console.log("CALCULATED TIMES ARE: ", JSON.stringify(combinedTimes));
 
   return {
-    type: DibsActionType.GetDibsRooms,
-    payload
-  }
+    type: DibsActionType.BookDibsRoom,
+    payload: { startTime: combinedTimes[0].time, reservationLength: combinedTimes[0].length, startDate: day, lastName: userInfo.lastName, firstName: userInfo.firstName, emailAddress: userInfo.email, phoneNumber: userInfo.phoneNumber, room }
+  };
 }
 
-export async function getDibsBookingsForRoom(roomID: number, date: string): Promise<DibsAction> {
-  const res = await (await httpc.get(`https://queensu.evanced.info/dibsapi/reservations/${date}/${roomID}`)).readBody();
-  let payload = [];
-
-  try {
-    payload = JSON.parse(res)
-  } catch (e) {
-    console.error("Error at getDibsRooms action: ", e);
-  }
-
+export function getDibsRooms(): DibsAction {
   return {
     type: DibsActionType.GetDibsRooms,
-    payload
-  }
-}
-
-export async function getDibsBookingsForAllRooms(rooms: Room[], date: number): Promise<DibsAction> {
-  let roomBookings: Array<Room> = [];
-
-  for (const room of rooms) {
-    if (room.roomID) {
-      const dateStr = getDibsDayStrFromIntDay(date);
-      const res = await (await httpc.get(`https://queensu.evanced.info/dibsapi/reservations/${dateStr}/${room.id}`)).readBody();
-
-      try {
-        const times = JSON.parse(res);
-
-        const freeArr = convertDibsTimesToQBookTimes(times);
-        const free = room.Free;
-        free[date] = freeArr;
-
-        roomBookings.push({ ...room, Free: free });
-      } catch (e) {
-        console.error("Error at getDibsRooms action: ", e);
-      }
-    }
-  }
-
-  return {
-    type: DibsActionType.GetAllDibsRooms,
-    payload: roomBookings
+    payload: null
   }
 }

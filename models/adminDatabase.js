@@ -6,7 +6,7 @@ if (env == 'dev')
 else
   var db = monk('mongodb://heroku_hh23n177:mkhup337tbpb35q85m5c066jla@ds035607.mlab.com:35607/heroku_hh23n177');
 
-var adminDB = db.get('adminDatabase');
+const adminDB = db.get('adminDatabase');
 
 // addSchedule(createSchedule(new Date(2018, 3, 1), 2, [7], [1]));
 // getInRange(1).then(function (data) {
@@ -33,7 +33,7 @@ export function addSchedule(schedule) {
   return new Promise(function (resolve, reject) {
     var out;
     var errors = [];
-    for (room of schedule.roomsAffected) {
+    for (const room of schedule.roomsAffected) {
       adminDB.find({ RoomID: room }, function (err, data) {
         if (err) {
           console.log(err);

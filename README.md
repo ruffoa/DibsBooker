@@ -30,7 +30,7 @@ Once this is done, all you have to do is type `npm run debug:windows` into CMD t
 
 ### Running Tests
 
-Automated tests are currently being created. Check the test folder for current progress or check back later. We are using Mocha as our testing framework and Chai as the assertion library.
+Automated tests are currently being created. Check the test folder for current progress or check back later. We are using Mocha as our testing framework and Sinon for sandboxing.
 
 Thanks to BrowserStack
 <a href="https://browserstack.com"> <img src="archive/Browserstack-logo.png" width="12%"> </a>

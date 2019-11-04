@@ -1,4 +1,4 @@
-var assert = require('chai').assert;
+import 'assert';
 var roomBook = require('../../models/roomBooking');
 var server = require('express')();
 

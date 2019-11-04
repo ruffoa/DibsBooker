@@ -61,7 +61,6 @@
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6",
     "babel-plugin-react-require": "^3.1.1",
-    "chai": "^4.2.0",
     "cheerio": "^1.0.0-rc.3",
     "concurrently": "^5.0.0",
     "css-loader": "^3.2.0",
@@ -96,7 +95,7 @@
     "watch:server": "webpack --watch --progress --colors --config ./config/webpack.config.server.js",
     "watch:client": "webpack --watch --progress --colors --config ./config/webpack.config.client.js",
     "start": "node ./dist/server.js",
-    "debug:windows": "NODE_ENV=dev npm run build:windows && concurrently -n watch,debug \"npm:watch:*\" \"npm:debug:server\"",
+    "debug:windows": "set NODE_ENV=dev npm run build:windows && concurrently -n watch,debug \"npm:watch:*\" \"npm:debug:server\"",
     "build:windows": "npm run build:clientwindows && npm run build:server",
     "build:clientwindows": "set BABEL_ENV=client webpack --progress --colors --config ./config/webpack.config.client.js",
     "clean:windows": "rmdir /s /q dist public/*.js public/*.map"

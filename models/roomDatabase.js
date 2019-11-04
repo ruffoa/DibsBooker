@@ -81,7 +81,7 @@ export function getAllFreeNow() {
  * @return {*}: the id of the free room
  */
 export async function getNextFree() {
-  var time = getNextValidHalfHour(false, true);
+  const time = getNextValidHalfHour(false, true);
   console.log('calling get list of Room state with: ', time);
   const rooms = await getListOfRoomState(0, time);
   if (rooms === {})
