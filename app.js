@@ -12,6 +12,7 @@ import flash from "connect-flash";
 import configDB from "./config/database.js";
 import * as dbFuncs from "./models/dbFunctions";
 import * as email from "./models/sendEmail";
+import {setupPrefetcher} from "./src/lib/dibsPrefetcher";
 
 import './src/SCSS/main.scss';
 
@@ -159,6 +160,10 @@ if (env != 'dev'){
         console.log("Ping......");
     }, 300000); // every 5 minutes (300000)
 }
+
+setupPrefetcher().then(() => {  // wait for the prefetcher to start, and get the dibs data.
+    return;
+});
 
 export default server;
 

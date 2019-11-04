@@ -24,7 +24,7 @@ export async function getDibsBookingsForRoom(roomID: number, date: string): Prom
   }
 }
 
-export async function getDibsBookingsForAllRooms(rooms: Room[], date: number): Promise<DibsAction> {
+export async function getDibsBookingsForAllRooms(rooms: Room[], date: number): Promise<Array<Room>> {
   let roomBookings: Array<Room> = [];
 
   for (const room of rooms) {
@@ -39,22 +39,49 @@ export async function getDibsBookingsForAllRooms(rooms: Room[], date: number): P
         const free = room.Free;
         free[date] = freeArr;
 
-        roomBookings.push({ ...room, Free: free });
+        roomBookings.push({...room, Free: free});
       } catch (e) {
         console.error("Error at getDibsRooms action: ", e);
       }
     }
   }
 
-  return {
-    type: DibsActionType.GetAllDibsRooms,
-    payload: roomBookings
+  return roomBookings;
+}
+
+export async function getDibsBookingsForAllRoomsForGivenDays(rooms: Room[], nDays: number): Promise<Array<Room>> {
+  let roomBookings: Array<Room> = [];
+
+  for (const room of rooms) {
+    if (room.roomID) {
+
+      let free = room.Free;
+
+      for (let i = 0; i < nDays; i++) {
+        const dateStr = getDibsDayStrFromIntDay(i);
+        const res = await (await httpc.get(`https://queensu.evanced.info/dibsapi/reservations/${dateStr}/${room.id}`)).readBody();
+
+        try {
+          const times = JSON.parse(res);
+
+          const freeArr = convertDibsTimesToQBookTimes(times);
+          free[i] = freeArr;
+
+        } catch (e) {
+          console.error("Error at getDibsBookingsForAllRoomsForGivenDays action at date: ", i, e);
+        }
+      }
+
+      roomBookings.push({...room, Free: free});
+    }
   }
+
+  return roomBookings;
 }
 
 export async function tryToBook(bookingParams: DibsBookingPayload) {
   const dibsWSURL = 'https://queensu.evanced.info/admin/dibs/api/reservations/post';
-  const { room, emailAddress, firstName, lastName, phoneNumber, reservationLength, startDate, startTime } = bookingParams;
+  const {room, emailAddress, firstName, lastName, phoneNumber, reservationLength, startDate, startTime} = bookingParams;
 
   if (emailAddress.endsWith('@queensu.ca') && room !== null && firstName !== null && lastName !== null && reservationLength !== null && startDate !== null) {
     console.log("Checking params!");
@@ -64,14 +91,24 @@ export async function tryToBook(bookingParams: DibsBookingPayload) {
     }
 
     let result = null;
-    const roomid = room.roomID;
+    const roomid = room.id;
     const date = getDateFromIntDayTime(startDate, startTime);
 
     console.log("BOOKING! ", date, roomid, emailAddress, phoneNumber, firstName, lastName, reservationLength, startTime);
 
     await $.post({
       url: dibsWSURL,
-      data: JSON.stringify({ roomid, emailAddress, firstName, lastName, phoneNumber, reservationLength, startDate: date, langCode: "en-US", staffAccess: false }),
+      data: JSON.stringify({
+        roomid,
+        emailAddress,
+        firstName,
+        lastName,
+        phoneNumber,
+        reservationLength,
+        startDate: date,
+        langCode: "en-US",
+        staffAccess: false
+      }),
       contentType: "application/json; charset=utf-8",
       async: true,
       success: function (objReturn) {

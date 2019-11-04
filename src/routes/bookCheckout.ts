@@ -36,11 +36,9 @@ router.post('/bookroom', async function (req, res) { // similar to the book func
     });
   } else {
     console.log('booking');
-    // await bookDibsRoom()
-    // await book(day, times, roomName, usrid, req, res); // the function to book the room
 
     const data = await tryToBook({ startTime: combinedTimes[0].time, reservationLength: combinedTimes[0].length, startDate: day, lastName: userInfo.lastName, firstName: userInfo.firstName, emailAddress: userInfo.email, phoneNumber: userInfo.phoneNumber, room })
-    res.send({ HeaderMsg: data.header, BookingStatusMsg: data.bookMsg, BookStatus: data.success });
+    res.send({ HeaderMsg: data.Message, BookingStatusMsg: data.Message, BookStatus: data.IsSuccess });
   }
 });
 

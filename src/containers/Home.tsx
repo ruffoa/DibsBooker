@@ -18,7 +18,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Link } from 'react-router-dom'
 import MaterialDatePicker from '../components/MaterialDatePicker';
 import postReq from '../client/postReq';
-import { sanitiseTime, getDaysFromToday } from '../lib/dateFuncs';
+import {sanitiseTime, getDaysFromToday, getPrettyDay, formatDateAsYMD, formatIntDateAsYMD} from '../lib/dateFuncs';
 
 async function fetchData(date, time) {
   const dateToSend = date || new Date();
@@ -253,12 +253,14 @@ class Home extends Component<Props, State> {
       });
     } else {
       const res = await fetchData(date, selectedTime) as RoomPostData;
+      const intday = getDaysFromToday(date);
 
       this.setState({
         currentHour: res.currentHour,
-        intDay: getDaysFromToday(date),
+        intDay: intday,
         roomData: res.list || this.state.roomData,
-        timeCount: res.timeCount || this.state.timeCount
+        timeCount: res.timeCount || this.state.timeCount,
+        prettyDate: formatIntDateAsYMD(intday)
       });
     }
 

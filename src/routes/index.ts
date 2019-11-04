@@ -13,6 +13,7 @@ import { getTimecount } from '../lib/roomBooking';
 import {getDibsBookingsForAllRooms} from "../lib/serverSideDibsFuncs";
 import {Room} from "../types/room";
 import {UserInfo} from "../types/user";
+import {getLatestDibsData} from "../lib/dibsPrefetcher";
 
 const express = require('express');
 const router = express.Router();
@@ -46,9 +47,12 @@ router.get('/', async function (req, res, next) {
   const userid = getUserID(req);
 
   const listFree = await getListOfRoomState(day, -1, userid);
+  const cachedDibs = getLatestDibsData();
 
-  const dibsFree = await getDibsBookingsForAllRooms(listFree, 0);
-  const timecount = getTimecount(day, userid, current_hour, dibsFree.payload);
+  console.log("CACHED DATA: ", cachedDibs);
+
+  const dibsFree = cachedDibs !== undefined && cachedDibs.length && cachedDibs[0] !== undefined ? cachedDibs : await getDibsBookingsForAllRooms(listFree, 0);
+  const timecount = getTimecount(day, userid, current_hour, dibsFree);
 
   const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req));
   const context = {};
@@ -96,10 +100,12 @@ router.post('/index', async function (req, res) {
     const usrid = getUserID(req);
 
     const listFree = await getListOfRoomState(daysFromToday, -1, usrid);
-    const dibsFree = await getDibsBookingsForAllRooms(listFree, daysFromToday);
 
-    console.log('getting data for: ', daysFromToday, current_hour, listFree.length, (dibsFree.payload as Room[]).length);
-    const timeCount = getTimecount(daysFromToday, usrid, 7, dibsFree.payload);
+    const cachedDibs = getLatestDibsData();
+    const dibsFree = cachedDibs !== undefined && cachedDibs[daysFromToday] !== undefined ? cachedDibs : await getDibsBookingsForAllRooms(listFree, 0);
+
+    console.log('getting data for: ', daysFromToday, current_hour, listFree.length, dibsFree.length);
+    const timeCount = getTimecount(daysFromToday, usrid, 7, dibsFree);
     const prettyDate = formatDate(postDataDate);
 
     res.send({
