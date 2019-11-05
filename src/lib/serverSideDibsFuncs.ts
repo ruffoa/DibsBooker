@@ -124,6 +124,7 @@ export async function tryToBook(bookingParams: DibsBookingPayload) {
       }
     });
 
+    console.log("BOOKING RESULT TO BE RETURNED: ", result);
     return result;
   }
 }

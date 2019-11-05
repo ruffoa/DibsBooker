@@ -11,7 +11,7 @@ import { UserAccountType } from '../types/enums/user';
 import { getDaysFromToday } from '../lib/dateFuncs';
 import { getTimecount } from '../lib/roomBooking';
 import {getDibsBookingsForAllRooms} from "../lib/serverSideDibsFuncs";
-import {Room} from "../types/room";
+import {ExtendedRoom, Room} from "../types/room";
 import {UserInfo} from "../types/user";
 import {getLatestDibsData} from "../lib/dibsPrefetcher";
 
@@ -33,6 +33,14 @@ async function createStoreInstance(req, data, current_hour, timeCount, userInfo:
   return store;
 }
 
+async function getCacheOrDefault(dibs: Array<Room>, listFree: Array<Room>): Promise<Array<Room>> {
+  if (!!dibs && dibs.length && !!dibs[0])
+    return dibs;
+
+  const temp = await getDibsBookingsForAllRooms(listFree, 0);
+  return temp;
+}
+
 router.get('/', async function (req, res, next) {
   const dateObj = new Date();
   let current_hour = dateObj.getHours();
@@ -49,12 +57,12 @@ router.get('/', async function (req, res, next) {
   const listFree = await getListOfRoomState(day, -1, userid);
   const cachedDibs = getLatestDibsData();
 
-  console.log("CACHED DATA: ", cachedDibs);
+  // console.log("CACHED DATA: ", cachedDibs);
 
-  const dibsFree = cachedDibs !== undefined && cachedDibs.length && cachedDibs[0] !== undefined ? cachedDibs : await getDibsBookingsForAllRooms(listFree, 0);
+  const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
   const timecount = getTimecount(day, userid, current_hour, dibsFree);
 
-  const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req));
+  const store = await createStoreInstance(req, dibsFree, current_hour, timecount, getUserInfo(req));
   const context = {};
   const { html: body, css: MuiCss } = renderAppToString(req, context, store);
   const title = 'QBook';
@@ -102,14 +110,14 @@ router.post('/index', async function (req, res) {
     const listFree = await getListOfRoomState(daysFromToday, -1, usrid);
 
     const cachedDibs = getLatestDibsData();
-    const dibsFree = cachedDibs !== undefined && cachedDibs[daysFromToday] !== undefined ? cachedDibs : await getDibsBookingsForAllRooms(listFree, 0);
+    const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
 
     console.log('getting data for: ', daysFromToday, current_hour, listFree.length, dibsFree.length);
     const timeCount = getTimecount(daysFromToday, usrid, 7, dibsFree);
     const prettyDate = formatDate(postDataDate);
 
     res.send({
-      list: listFree,
+      list: dibsFree,
       timeCount: timeCount,
       currentHour: current_hour,
       prettyDate: prettyDate,

@@ -35,8 +35,6 @@ router.post('/bookroom', async function (req, res) { // similar to the book func
       BookStatus: false
     });
   } else {
-    console.log('booking');
-
     const data = await tryToBook({ startTime: combinedTimes[0].time, reservationLength: combinedTimes[0].length, startDate: day, lastName: userInfo.lastName, firstName: userInfo.firstName, emailAddress: userInfo.email, phoneNumber: userInfo.phoneNumber, room })
     res.send({ HeaderMsg: data.Message, BookingStatusMsg: data.Message, BookStatus: data.IsSuccess });
   }
