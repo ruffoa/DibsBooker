@@ -4,7 +4,7 @@ var env = process.env.NODE_ENV || 'dev';
 if (env == 'dev')
   var db = monk('localhost:27017/roomDatabase');
 else
-  var db = monk('mongodb://user:R!8s5nyG9Tce9pU@ds241308.mlab.com:41308/heroku_qzc36wmm');
+  var db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 
 var roomDatabase = db.get('roomDatabase');
 var schedule = require('node-schedule');

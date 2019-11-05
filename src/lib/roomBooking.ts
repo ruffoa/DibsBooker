@@ -6,7 +6,7 @@ let db;
 if (env == 'dev') {
   db = monk('localhost:27017/roomDatabase');
 } else {
-  db = monk('mongodb://user:R!8s5nyG9Tce9pU@ds241308.mlab.com:41308/heroku_qzc36wmm');
+  db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 }
 
 const roomDatabase = db.get('roomDatabase');
