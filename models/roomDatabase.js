@@ -4,9 +4,9 @@ var env = process.env.NODE_ENV || 'dev';
 if (env == 'dev')
   var db = monk('localhost:27017/roomDatabase');
 else
-  var db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+  var db = monk('mongodb://user:R!8s5nyG9Tce9pU@ds241308.mlab.com:41308/heroku_qzc36wmm');
 var roomDatabase = db.get('roomDatabase');
-const adminFuncs = require('./adminDatabase');
+// const adminFuncs = require('./adminDatabase');
 
 //All functions return promises, don't know if this is the best way to do this.
 //use .then(function(data){}) to get whatever data is needed

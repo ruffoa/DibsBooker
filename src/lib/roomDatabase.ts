@@ -1,5 +1,5 @@
 import { getNextValidHalfHour } from '../../models/roomDatabase';
-import { getDisabledRoomIDs } from '../../models/adminDatabase';
+// import { getDisabledRoomIDs } from '../../models/adminDatabase';
 import monk from 'monk';
 import { ExtendedRoom, Room, RoomFreeTable } from '../types/room';
 import { isValidTime } from './dateFuncs';
@@ -10,7 +10,7 @@ let db;
 if (env == 'dev') {
   db = monk('localhost:27017/roomDatabase');
 } else {
-  db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+  db = monk('mongodb://user:R!8s5nyG9Tce9pU@ds241308.mlab.com:41308/heroku_qzc36wmm');
 }
 
 const roomDatabase = db.get('roomDatabase');
@@ -36,7 +36,8 @@ export async function getListOfRoomState(day: number, time: number, usrid: numbe
 
   const data = await roomDatabase.find({});
 
-  const disabledRooms = await getDisabledRoomIDs();
+  // const disabledRooms = await getDisabledRoomIDs();
+  const disabledRooms = [];
 
   for (const roomData of data) {
     const roomNum = roomData.Name.match(/\d+/)[0]; // get the number from the room
@@ -146,7 +147,9 @@ export async function getFreeTableWithUserData(roomID: string, day: number = -1,
 }
 
 export async function getFreeTable(roomID: string, day: number = -1): Promise<RoomFreeTable[] | Array<RoomFreeTable[]>> { //gets the free table of the roomID for all days
-  const disabledRooms = await getDisabledRoomIDs();
+  // const disabledRooms = await getDisabledRoomIDs();
+  const disabledRooms = [];
+
   const roomData = await roomDatabase.find({ RoomID: roomID });
 
   if (roomData.length <= 0)
