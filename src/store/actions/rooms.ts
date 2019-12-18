@@ -22,3 +22,10 @@ export function setTimeCount(payload: Array<TimeCountObject>): RoomDataAction {
   };
 }
 
+export function setDate(payload: number): RoomDataAction {
+  return {
+    type: RoomsActionType.SetDate,
+    payload
+  };
+}
+

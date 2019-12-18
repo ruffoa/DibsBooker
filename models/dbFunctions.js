@@ -81,8 +81,8 @@ export function setupEndOfDayScript() {
   schedule.scheduleJob({ hour: 0, minute: 0 }, function () {
     console.log("Shifting day now...")
     endOfDayShift();
-    console.log("Checking admin database...")
-    checkAdminDB();
+    // console.log("Checking admin database...")
+    // checkAdminDB();
   }); // runs everyday at midnight
 
   console.log("Done setup!  Free table should automagically™ remove the previous day, and add a new day at midnight");

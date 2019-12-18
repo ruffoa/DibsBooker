@@ -38,17 +38,17 @@ function createNewFreeTable(length, isFree) {
 }
 
 export async function getFree(day, roomID) { //gets the free array of the roomID on the day given
-  const disabledRooms = await adminFuncs.getDisabledRoomIDs();
+  // const disabledRooms = await adminFuncs.getDisabledRoomIDs();
   const rooms = await roomDatabase.find({ RoomID: roomID });
 
   if (rooms.length <= 0)
     return undefined;
 
-  if (disabledRooms.includes(roomID)) {
-    if (day < rooms[0].Free.length) {
-      return createNewFreeTable(rooms[0].Free[day].length, false)
-    }
-  }
+  // if (disabledRooms.includes(roomID)) {
+  //   if (day < rooms[0].Free.length) {
+  //     return createNewFreeTable(rooms[0].Free[day].length, false)
+  //   }
+  // }
 
   if (day < rooms[0].Free.length)
     return rooms[0].Free[day];
@@ -177,7 +177,7 @@ export async function getListOfRoomState(day, time, usrid) {
   usrid = typeof usrid !== 'undefined' ? usrid : -1;
 
   const data = await roomDatabase.find({});
-  const disabledRooms = await adminFuncs.getDisabledRoomIDs();
+  // const disabledRooms = await adminFuncs.getDisabledRoomIDs();
 
   for (const roomData of data) {
     var roomNum = roomData.Name.match(/\d+/)[0]; // get the number from the room
@@ -185,7 +185,7 @@ export async function getListOfRoomState(day, time, usrid) {
     var listRoomName = "bmh-" + roomNum;
     const isNotValidTime = time !== -1 ? !isValidTime(time) : false;
 
-    if (isNotValidTime || disabledRooms.includes(roomData.RoomID)) {
+    if (isNotValidTime) {
       listFree.push({
         room: roomData.Name,
         roomNum: mapRoomName,

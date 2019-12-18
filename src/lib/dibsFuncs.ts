@@ -24,10 +24,10 @@ function generateFreeTable(days: number, dayLength: number, isFree: boolean = fa
 }
 
 export function convertDibsTimesToQBookTimes(times: Array<DibsRoomHours>): Array<RoomFreeTable> {
-  if (!times || !times.length)
-    return [];
-
   const free = generateFreeTable(1, day_length, true);
+
+  if (!times || !times.length)
+    return free[0];
 
   times.map((time) => {
     const sTime = parseTimeStr(time.StartTime);

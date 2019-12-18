@@ -1,5 +1,6 @@
 # DibsBooker / QBook
 This project is a fork of [QBook](https://github.com/essdev-team/dibs-wrapper), with an emphasis on allowing users to book rooms with the current D!bs system, bypassing the existing UI.
+A version of the project with the latest code changes is hosted [here](https://dibs-wrapper.herokuapp.com/), however this build may be buggy and unusable at any given time.
 
 ## Getting Started
 

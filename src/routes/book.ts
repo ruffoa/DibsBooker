@@ -1,6 +1,6 @@
 import template from '../server/template';
 import createStore from '../store/createStore';
-import { setCurrentHour, setRooms, setTimeCount } from '../store/actions/rooms';
+import {setCurrentHour, setDate, setRooms, setTimeCount} from '../store/actions/rooms';
 import {setLoggedIn, setUserInfo} from '../store/actions/user';
 import renderAppToString from '../server/renderAppToString';
 import { compile } from '../server/compileSass';
@@ -23,13 +23,14 @@ function addDays(date, days) {
   return result;
 }
 
-async function createStoreInstance(req, data, current_hour, timeCount, userInfo: UserInfo) {
+async function createStoreInstance(req, data, current_hour, timeCount, userInfo: UserInfo, date) {
   const store = createStore({});
   await store.dispatch(setRooms(data));
   await store.dispatch(setCurrentHour(current_hour));
   await store.dispatch(setTimeCount(timeCount));
   await store.dispatch(setLoggedIn(req.isAuthenticated()));
   await store.dispatch(setUserInfo(userInfo));
+  await store.dispatch(setDate(date));
 
   return store;
 }
@@ -61,11 +62,11 @@ router.get('/book-v2/:roomName/', async function (req, res, next) {
 
   const themeColors = req.colors;
 
-  const listFree = await getListOfRoomState(day, -1, userid);
-  const dibsFree = await getDibsBookingsForAllRooms(listFree, 0);
+  const listFree = await getListOfRoomState(day, -1, userid); // gives back data for EVERY day if -1 for time
+  const dibsFree = await getDibsBookingsForAllRooms(listFree, day);
   const timecount = getTimecount(day, userid, current_hour, dibsFree.payload);
 
-  const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req));
+  const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req), day);
   const context = {};
   const { html: body, css: MuiCss } = renderAppToString(req, context, store);
   const title = `QBook - Book ${roomInfo.room} for ${dateObj.toDateString()}`;
@@ -111,15 +112,16 @@ router.get('/book-v2/:roomName/:date', async function (req, res, next) {
     res.status(404).send(message);
   }
 
+  console.log("THE DATE IS: ", diff, date);
   const roomInfo: Room = await getInfoByName(room);
   if (!roomInfo) { // invalid room, the user specified an invalid room, so we will show the 404 page
     // do nothing here, and end the "render" call
     return null;
   }
 
-  const listFree = await getListOfRoomState(day, -1, userid);
-  const dibsFree = await getDibsBookingsForAllRooms(listFree, 0);
-  const timecount = getTimecount(day, userid, current_hour, dibsFree.payload);
+  const listFree = await getListOfRoomState(day, -1, userid); // gives back for all days, so date passed is irrelevant
+  const dibsFree = await getDibsBookingsForAllRooms(listFree, diff);
+  const timecount = getTimecount(diff, userid, current_hour, dibsFree.payload);
 
   const roomID = roomInfo.roomID;
   const roomFreeTable = await getFreeTable(roomID);
@@ -128,14 +130,14 @@ router.get('/book-v2/:roomName/:date', async function (req, res, next) {
   roomInfo.userId = usrid;
   roomInfo.Free = roomFreeTable;
   roomInfo.Picture = '/img/' + imgID;
-  roomInfo.day = 0;
+  roomInfo.day = diff;
 
   const themeColors = req.colors;
 
-  const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req));
+  const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req), diff);
   const context = {};
   const { html: body, css: MuiCss } = renderAppToString(req, context, store);
-  const title = `QBook - Book ${roomInfo.room} for ${dateObj.toDateString()}`;
+  const title = `QBook - Book ${roomInfo.room} for ${date.toDateString()}`;
   const theme = req.theme === 'custom' ? false : req.theme || 'default';
   const cssPath = [`/CSS/room-style/${theme}-room-style.css`];
   const compiledCss = compile('src/SCSS/main.scss');

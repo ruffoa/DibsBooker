@@ -1,5 +1,5 @@
 import { StoreState } from '../types/store';
-import { selectCurrentHour, selectRoomData, selectTimeCount } from '../store/selectors/rooms';
+import {selectCurrentHour, selectDate, selectRoomData, selectTimeCount} from '../store/selectors/rooms';
 import {selectIsLoggedIn, selectUserInfo} from '../store/selectors/user';
 import { connect } from 'react-redux';
 import * as React from 'react';
@@ -33,6 +33,7 @@ interface Props extends RouteComponentProps<MatchParams> {
   isLoggedIn: boolean;
   roomData: Array<Room>;
   day: string;
+  date: number;
   bookDibsRoom: Dispatch;
   bookMultipleDibsRooms: Dispatch;
   userInfo: UserInfo;
@@ -58,7 +59,7 @@ class Book extends React.Component<Props, State> {
 
     this.state = {
       alert: null,
-      day: this.props.day && getDaysFromToday(new Date(this.props.day)) || 0,
+      day: this.props.date || this.props.day && getDaysFromToday(new Date(this.props.day)) || 0,
       currentHour: sanitiseTime(this.props.currentHour || new Date().getHours(), true),
       response: [],
       selectedTimes: [],
@@ -303,6 +304,7 @@ function mapStateToProps(state: StoreState) {
   return {
     roomData: selectRoomData(state),
     currentHour: selectCurrentHour(state),
+    date: selectDate(state),
     timeCount: selectTimeCount(state),
     isLoggedIn: selectIsLoggedIn(state),
     userInfo: selectUserInfo(state),

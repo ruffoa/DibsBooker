@@ -10,7 +10,7 @@ import {
   ServerStyleSheets,
 } from '@material-ui/core/styles';
 
-export default function renderAppToString(req, context, store) {
+export default function renderAppToString(req, context, store, mainClass = '') {
   const sheets = new ServerStyleSheets();
 
   // Create a theme instance.
@@ -44,5 +44,5 @@ export default function renderAppToString(req, context, store) {
     '\\u003c'
   )};</script>`;
 
-  return { html: `<div id="main" role="main">${appString}</div>` + storeScript, css };
+  return { html: `<div id="main" role="main" ${mainClass && `class="${mainClass}"`}>${appString}</div>` + storeScript, css };
 }

@@ -59,6 +59,7 @@ export interface TimeCountObject {
 export interface RoomState {
   rooms: Array<Room>;
   currentHour: number;
+  date: number;
   timeCount: Array<TimeCountObject>;
 }
 

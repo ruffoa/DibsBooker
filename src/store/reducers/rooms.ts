@@ -4,6 +4,7 @@ import { RoomsActionType } from '../../types/enums/room';
 const initialState: RoomState = {
   rooms: null,
   currentHour: null,
+  date: null,
   timeCount: null
 };
 
@@ -31,6 +32,12 @@ export default function roomsReducer(state: RoomState = initialState, action: Ro
     };
   }
 
+  if (type === RoomsActionType.SetDate) {
+    return {
+      ...state,
+      date: payload as number
+    };
+  }
 
   return state;
 }

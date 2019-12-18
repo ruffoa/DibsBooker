@@ -325,8 +325,10 @@ export function getTimecount(day: number, userId: number, currentHour: number, l
     }
   }
 
-  for (let i = 0; i < timeCount.length; i++)
+  for (let i = 0; i < timeCount.length; i++) {
+    console.log("TIMECOUNT ", i, timeCount[i]);
     timeCount[i].totalFree = timeCount[i].totalCount - timeCount[i].hourCount;
+  }
 
   return timeCount;
 }
