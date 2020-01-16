@@ -43,7 +43,7 @@ router.get('/signup', async function (req, res, next) { //the request to render 
 
     const store = await createStoreInstance(req, current_hour);
     const context = {};
-    const { html: body, css: MuiCss } = renderAppToString(req, context, store, 'with-background');
+    const { html: body, css: MuiCss } = renderAppToString(req, context, store);
     const title = 'Signup';
     const theme = req.theme === "custom" ? false : req.theme || 'default';
     const cssPath = [`/CSS/room-style/${theme}-room-style.css`];

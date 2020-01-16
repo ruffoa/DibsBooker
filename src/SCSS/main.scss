@@ -52,6 +52,15 @@ body, wrapper {
 
 .content__wrapper {
   flex-grow: 1;
+
+  &--with-image {
+    margin-top: -30px;
+    margin-bottom: -40px;
+  }
+}
+
+.vertically-center {
+  align-items: center;
 }
 
 .remove-spacing {
