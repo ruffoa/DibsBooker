@@ -12,6 +12,7 @@ import { getTimecount } from '../lib/roomBooking';
 import {getUserID, getUserInfo} from '../lib/userFunctions';
 import {UserInfo} from "../types/user";
 import {getDibsBookingsForAllRooms} from "../lib/serverSideDibsFuncs";
+import {fetchDibsDataForSpecificDayIfNotPresent, getCacheOrDefault} from "../lib/dibsPrefetcher";
 
 const express = require('express');
 const router = express.Router();
@@ -63,7 +64,8 @@ router.get('/book-v2/:roomName/', async function (req, res, next) {
   const themeColors = req.colors;
 
   const listFree = await getListOfRoomState(day, -1, userid); // gives back data for EVERY day if -1 for time
-  const dibsFree = await getDibsBookingsForAllRooms(listFree, day);
+  const cachedDibs = await fetchDibsDataForSpecificDayIfNotPresent(day);  // day is hardcoded to 0
+  const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
   const timecount = getTimecount(day, userid, current_hour, dibsFree.payload);
 
   const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req), day);
@@ -120,7 +122,9 @@ router.get('/book-v2/:roomName/:date', async function (req, res, next) {
   }
 
   const listFree = await getListOfRoomState(day, -1, userid); // gives back for all days, so date passed is irrelevant
-  const dibsFree = await getDibsBookingsForAllRooms(listFree, diff);
+
+  const cachedDibs = await fetchDibsDataForSpecificDayIfNotPresent(diff);
+  const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
   const timecount = getTimecount(diff, userid, current_hour, dibsFree.payload);
 
   const roomID = roomInfo.roomID;

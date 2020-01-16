@@ -4,7 +4,7 @@ import {selectIsLoggedIn, selectUserInfo} from '../store/selectors/user';
 import { connect } from 'react-redux';
 import * as React from 'react';
 import { Room, RoomFreeTable } from '../types/room';
-import { getDaysFromToday, getPrettyDay, sanitiseTime } from '../lib/dateFuncs';
+import {changePrettyDateToIntDay, getDaysFromToday, getPrettyDay, sanitiseTime} from '../lib/dateFuncs';
 import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Grid, Typography } from '@material-ui/core';
 import { PhoneRounded, TvRounded } from '@material-ui/icons';
 import { GridItemWidths } from '../types/enums/grid';
@@ -60,7 +60,7 @@ class Book extends React.Component<Props, State> {
 
     this.state = {
       alert: null,
-      day: this.props.date || this.props.day && getDaysFromToday(new Date(this.props.day)) || this.props.match.params && this.props.match.params.date && getDaysFromToday(new Date(props.match.params.date)) || 0,
+      day: this.props.date || this.props.day && getDaysFromToday(new Date(this.props.day)) || this.props.match.params && this.props.match.params.date && changePrettyDateToIntDay(props.match.params.date) || 0,
       currentHour: sanitiseTime(this.props.currentHour || new Date().getHours(), true),
       response: [],
       selectedTimes: [],

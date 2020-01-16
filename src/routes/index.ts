@@ -13,7 +13,7 @@ import { getTimecount } from '../lib/roomBooking';
 import {getDibsBookingsForAllRooms} from "../lib/serverSideDibsFuncs";
 import {ExtendedRoom, Room} from "../types/room";
 import {UserInfo} from "../types/user";
-import {fetchDibsDataForSpecificDayIfNotPresent, getLatestDibsData} from "../lib/dibsPrefetcher";
+import {fetchDibsDataForSpecificDayIfNotPresent, getCacheOrDefault, getLatestDibsData} from "../lib/dibsPrefetcher";
 
 const express = require('express');
 const router = express.Router();
@@ -31,14 +31,6 @@ async function createStoreInstance(req, data, current_hour, timeCount, userInfo:
   await store.dispatch(setUserInfo(userInfo));
 
   return store;
-}
-
-async function getCacheOrDefault(dibs: Array<Room>, listFree: Array<Room>): Promise<Array<Room>> {
-  if (!!dibs && dibs.length && !!dibs[0])
-    return dibs;
-
-  const temp = await getDibsBookingsForAllRooms(listFree, 0);
-  return temp;
 }
 
 router.get('/', async function (req, res, next) {

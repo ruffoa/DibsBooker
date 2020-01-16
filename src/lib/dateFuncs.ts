@@ -156,3 +156,11 @@ export function isValidTime(time: number, day: number = 0): boolean {
 
   return true;
 }
+
+export function changePrettyDateToIntDay(date: string): number {
+  const utcDate = new Date(date);
+  const offsetDir = utcDate.getTimezoneOffset() > 0 ? 1 : -1;
+
+  utcDate.setTime(utcDate.getTime() + utcDate.getTimezoneOffset()*60*1000*offsetDir );
+  return getDaysFromToday(utcDate);
+}

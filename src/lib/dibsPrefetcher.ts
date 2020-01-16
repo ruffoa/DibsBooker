@@ -47,3 +47,11 @@ export async function fetchDibsDataForSpecificDayIfNotPresent(day: number) {
 
   return dibsDayData;
 }
+
+export async function getCacheOrDefault(dibs: Array<Room>, listFree: Array<Room>): Promise<Array<Room>> {
+  if (!!dibs && dibs.length && !!dibs[0])
+    return dibs;
+
+  const temp = await getDibsBookingsForAllRooms(listFree, 0);
+  return temp;
+}
