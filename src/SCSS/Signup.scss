@@ -1,18 +1,10 @@
-$assetPath : "/img";
-
-#main.with-background {
-  background-image: url("#{$assetPath}/ilc.jpg");
-  background-position: center;
-  background-size: cover;
-}
-
 .signup {
 
   &__card-container {
-    padding: 0;
+    padding: 30px 0;
 
     @media screen and (min-width: $medium-breakpoint) {
-      padding: 0 30px;
+      padding: 40px 30px;
     }
   }
 

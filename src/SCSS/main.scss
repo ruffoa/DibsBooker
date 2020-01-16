@@ -10,6 +10,8 @@
 @import './Quick';
 @import './Signup';
 
+$assetPath : "/img";
+
 body {
   font-family: "Nunito", Helvitica, sans-serif !important;
 }
@@ -52,6 +54,18 @@ body, wrapper {
 
 .content__wrapper {
   flex-grow: 1;
+
+  &--with-image {
+    margin-top: -30px;
+    margin-bottom: -40px;
+    background-image: url("#{$assetPath}/ilc.jpg");
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+.vertically-center {
+  align-items: center;
 }
 
 .remove-spacing {

@@ -278,9 +278,11 @@ class Signup extends React.Component<Props, State> {
     }
 
     return (
-      <div className="content__wrapper">
-        {this.renderAlert()}
-        {this.renderSignupForm()}
+      <div className="content__wrapper content__wrapper--with-image">
+        <div className="vertically-center">
+          {this.renderAlert()}
+          {this.renderSignupForm()}
+        </div>
       </div>
     );
   }
