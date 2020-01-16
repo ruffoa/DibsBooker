@@ -1,11 +1,3 @@
-$assetPath : "/img";
-
-#main.with-background {
-  background-image: url("#{$assetPath}/ilc.jpg");
-  background-position: center;
-  background-size: cover;
-}
-
 .signup {
 
   &__card-container {

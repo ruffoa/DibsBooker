@@ -10,6 +10,8 @@
 @import './Quick';
 @import './Signup';
 
+$assetPath : "/img";
+
 body {
   font-family: "Nunito", Helvitica, sans-serif !important;
 }
@@ -56,6 +58,9 @@ body, wrapper {
   &--with-image {
     margin-top: -30px;
     margin-bottom: -40px;
+    background-image: url("#{$assetPath}/ilc.jpg");
+    background-position: center;
+    background-size: cover;
   }
 }
 
