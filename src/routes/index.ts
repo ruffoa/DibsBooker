@@ -13,7 +13,7 @@ import { getTimecount } from '../lib/roomBooking';
 import {getDibsBookingsForAllRooms} from "../lib/serverSideDibsFuncs";
 import {ExtendedRoom, Room} from "../types/room";
 import {UserInfo} from "../types/user";
-import {getLatestDibsData} from "../lib/dibsPrefetcher";
+import {fetchDibsDataForSpecificDayIfNotPresent, getLatestDibsData} from "../lib/dibsPrefetcher";
 
 const express = require('express');
 const router = express.Router();
@@ -109,7 +109,7 @@ router.post('/index', async function (req, res) {
 
     const listFree = await getListOfRoomState(daysFromToday, -1, usrid);
 
-    const cachedDibs = getLatestDibsData();
+    const cachedDibs = await fetchDibsDataForSpecificDayIfNotPresent(daysFromToday);
     const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
 
     console.log('getting data for: ', daysFromToday, current_hour, listFree.length, dibsFree.length);

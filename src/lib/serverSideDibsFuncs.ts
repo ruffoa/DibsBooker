@@ -49,7 +49,7 @@ export async function getDibsBookingsForAllRooms(rooms: Room[], date: number): P
   return roomBookings;
 }
 
-export async function getDibsBookingsForAllRoomsForGivenDays(rooms: Room[], nDays: number): Promise<Array<Room>> {
+export async function getDibsBookingsForAllRoomsForDayRange(rooms: Room[], nDays: number): Promise<Array<Room>> {
   let roomBookings: Array<Room> = [];
 
   for (const room of rooms) {
@@ -78,6 +78,37 @@ export async function getDibsBookingsForAllRoomsForGivenDays(rooms: Room[], nDay
 
   return roomBookings;
 }
+
+export async function getDibsBookingsForAllRoomsForSpecifiedDays(rooms: Room[], days: Set<number>): Promise<Array<Room>> {
+  let roomBookings: Array<Room> = [];
+
+  for (const room of rooms) {
+    if (room.roomID) {
+
+      let free = room.Free;
+
+      days.forEach((async i => {
+        const dateStr = getDibsDayStrFromIntDay(i);
+        const res = await (await httpc.get(`https://queensu.evanced.info/dibsapi/reservations/${dateStr}/${room.id}`)).readBody();
+
+        try {
+          const times = JSON.parse(res);
+
+          const freeArr = convertDibsTimesToQBookTimes(times);
+          free[i] = freeArr;
+
+        } catch (e) {
+          console.error("Error at getDibsBookingsForAllRoomsForGivenDays action at date: ", i, e);
+        }
+      }));
+
+      roomBookings.push({...room, Free: free});
+    }
+  }
+
+  return roomBookings;
+}
+
 
 export async function tryToBook(bookingParams: DibsBookingPayload) {
   const dibsWSURL = 'https://queensu.evanced.info/admin/dibs/api/reservations/post';
