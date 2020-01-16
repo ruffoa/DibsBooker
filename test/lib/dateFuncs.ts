@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import {getDateFromIntDayTime, getDaysFromToday, getPrettyDay} from '../../src/lib/dateFuncs';
-import sinon from 'sinon';
+import {getDateFromIntDayTime, getDaysFromToday, getPrettyDay, parseTimeStr} from '../../src/lib/dateFuncs';
+import * as sinon from 'sinon';
 
 const sandbox = sinon.createSandbox();
 
@@ -258,6 +258,50 @@ describe('getDateFromIntDayTime', () => {
 
     const result = getDateFromIntDayTime(0, 23);
     assert.strictEqual(result, '2019/01/02 23:30:00', `Expected to see "2019/01/02 23:30:00", but got ${result} instead`);
+  });
+
+});
+
+describe('parseTimeStr', () => {
+
+  afterEach(() => {
+    // Restore the default sandbox here
+    sinon.restore();
+  });
+
+  it('returns the correct hour from the date', () => {
+    const date = new Date();
+
+    date.setHours(13, 12, 2);
+
+    const result = parseTimeStr(date.toISOString().split('.')[0]);
+    assert.strictEqual(result, 13, `Expected to see '13' returned for the hour, but got ${result} instead`);
+  });
+
+  it('does not break at the start of the new day', () => {
+    const date = new Date();
+
+    date.setHours(24, 0, 0);
+
+    const result = parseTimeStr(date.toISOString().split('.')[0]);
+    assert.strictEqual(result, 0, `Expected to see '0' returned for the hour, but got ${result} instead`);
+  });
+
+  it('does not break just before midnight', () => {
+    const date = new Date();
+
+    date.setHours(23, 59, 0);
+    const result = parseTimeStr(date.toISOString().split('.')[0]);
+    assert.strictEqual(result, 23, `Expected to see '23' returned for the hour, but got ${result} instead`);
+  });
+
+  it('does not break at 0h', () => {
+    const date = new Date();
+
+    date.setHours(0, 0, 1);
+
+    const result = parseTimeStr(date.toISOString().split('.')[0]);
+    assert.strictEqual(result, 0, `Expected to see '0' returned for the hour, but got ${result} instead`);
   });
 
 });

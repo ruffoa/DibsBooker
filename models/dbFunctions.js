@@ -4,12 +4,12 @@ var env = process.env.NODE_ENV || 'dev';
 if (env == 'dev')
   var db = monk('localhost:27017/roomDatabase');
 else
-  var db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+  var db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 
 var roomDatabase = db.get('roomDatabase');
 var schedule = require('node-schedule');
 var accountFuncs = require('../src/lib/userFunctions');
-var adminFuncs = require('./adminDatabase');
+// var adminFuncs = require('./adminDatabase');
 var roomBook = require('./roomBooking');
 
 export function endOfDayShift() {
@@ -62,12 +62,12 @@ export function endOfDayShift() {
 
 function checkAdminDB() {
   adminFuncs.getAll().then(function (rooms) {
-    for (var room of rooms) {
+    for (const room of rooms) {
       adminFuncs.getInRange(room.RoomID).then(function (ranges, err) {
         for (var range of ranges) {
           roomBook.bookMultiple(range.start, range.hours, range.roomID, "admin", undefined).then(function (data) {
             console.log("A schedule is in range, booking rooms...");
-            console.log(data);
+            // console.log(data);
           });
         }
       });
@@ -81,8 +81,8 @@ export function setupEndOfDayScript() {
   schedule.scheduleJob({ hour: 0, minute: 0 }, function () {
     console.log("Shifting day now...")
     endOfDayShift();
-    console.log("Checking admin database...")
-    checkAdminDB();
+    // console.log("Checking admin database...")
+    // checkAdminDB();
   }); // runs everyday at midnight
 
   console.log("Done setup!  Free table should automagically™ remove the previous day, and add a new day at midnight");

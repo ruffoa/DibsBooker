@@ -4,9 +4,9 @@ var env = process.env.NODE_ENV || 'dev';
 if (env == 'dev')
   var db = monk('localhost:27017/roomDatabase');
 else
-  var db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+  var db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 var roomDatabase = db.get('roomDatabase');
-const adminFuncs = require('./adminDatabase');
+// const adminFuncs = require('./adminDatabase');
 
 //All functions return promises, don't know if this is the best way to do this.
 //use .then(function(data){}) to get whatever data is needed
@@ -38,17 +38,17 @@ function createNewFreeTable(length, isFree) {
 }
 
 export async function getFree(day, roomID) { //gets the free array of the roomID on the day given
-  const disabledRooms = await adminFuncs.getDisabledRoomIDs();
+  // const disabledRooms = await adminFuncs.getDisabledRoomIDs();
   const rooms = await roomDatabase.find({ RoomID: roomID });
 
   if (rooms.length <= 0)
     return undefined;
 
-  if (disabledRooms.includes(roomID)) {
-    if (day < rooms[0].Free.length) {
-      return createNewFreeTable(rooms[0].Free[day].length, false)
-    }
-  }
+  // if (disabledRooms.includes(roomID)) {
+  //   if (day < rooms[0].Free.length) {
+  //     return createNewFreeTable(rooms[0].Free[day].length, false)
+  //   }
+  // }
 
   if (day < rooms[0].Free.length)
     return rooms[0].Free[day];
@@ -81,7 +81,7 @@ export function getAllFreeNow() {
  * @return {*}: the id of the free room
  */
 export async function getNextFree() {
-  var time = getNextValidHalfHour(false, true);
+  const time = getNextValidHalfHour(false, true);
   console.log('calling get list of Room state with: ', time);
   const rooms = await getListOfRoomState(0, time);
   if (rooms === {})
@@ -177,7 +177,7 @@ export async function getListOfRoomState(day, time, usrid) {
   usrid = typeof usrid !== 'undefined' ? usrid : -1;
 
   const data = await roomDatabase.find({});
-  const disabledRooms = await adminFuncs.getDisabledRoomIDs();
+  // const disabledRooms = await adminFuncs.getDisabledRoomIDs();
 
   for (const roomData of data) {
     var roomNum = roomData.Name.match(/\d+/)[0]; // get the number from the room
@@ -185,7 +185,7 @@ export async function getListOfRoomState(day, time, usrid) {
     var listRoomName = "bmh-" + roomNum;
     const isNotValidTime = time !== -1 ? !isValidTime(time) : false;
 
-    if (isNotValidTime || disabledRooms.includes(roomData.RoomID)) {
+    if (isNotValidTime) {
       listFree.push({
         room: roomData.Name,
         roomNum: mapRoomName,

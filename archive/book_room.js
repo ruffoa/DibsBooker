@@ -36,7 +36,7 @@ function checkReservation(firstName, lastName, phoneNumber, emailAddress, roomID
         });
     }
 }
-checkReservation("Alex", "Albinson", "", "14ar75@queensu.ca", "24", "2019/10/22 22:30:00", "1");
+checkReservation("Alex", "Albinson", "", "", "24", "2019/10/22 22:30:00", "1");
 // can book without a password (skips the entire verification process)
 // can book without a queens email
 // can book for up to 14 hours a day

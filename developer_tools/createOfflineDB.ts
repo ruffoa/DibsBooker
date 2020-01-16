@@ -9,7 +9,7 @@ let db = null;
 if (env == 'dev')
     db = monk('localhost:27017/roomDatabase');
 else
-    db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+    db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 
 const roomInfo = db.get('roomDatabase');
 const shouldDownloadAPIInfo = false;

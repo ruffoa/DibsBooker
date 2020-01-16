@@ -12,6 +12,7 @@ import flash from "connect-flash";
 import configDB from "./config/database.js";
 import * as dbFuncs from "./models/dbFunctions";
 import * as email from "./models/sendEmail";
+import {setupPrefetcher} from "./src/lib/dibsPrefetcher";
 
 import './src/SCSS/main.scss';
 
@@ -87,7 +88,7 @@ let env = process.env.NODE_ENV || 'dev';
 if (env == 'dev')
     mongoose.connect(configDB.accountURL); // connect to our database ->: fixed depreciation warning (it was a bug :P  https://github.com/Automattic/mongoose/issues/5399)
 else
-    mongoose.connect('mongodb://heroku_5h907111:qiobas1eprl1uddidasas235mt@ds253918.mlab.com:53918/heroku_5h907111');
+    mongoose.connect('mongodb://heroku_lh1d3t7t:26hu007sid1b85sqm6s8757amd@ds241298.mlab.com:41298/heroku_lh1d3t7t');
 
 configPassport(passport); // pass passport for configuration
 
@@ -114,7 +115,7 @@ env = process.env.NODE_ENV || 'dev';
 if (env == 'dev')
     var db = monk('localhost:27017/roomDatabase');
 else
-    var db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+    var db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 
 server.use(function (req, res, next) { //making database accessible to the router
     req.db = db;
@@ -159,6 +160,10 @@ if (env != 'dev'){
         console.log("Ping......");
     }, 300000); // every 5 minutes (300000)
 }
+
+setupPrefetcher().then(() => {  // wait for the prefetcher to start, and get the dibs data.
+    return;
+});
 
 export default server;
 

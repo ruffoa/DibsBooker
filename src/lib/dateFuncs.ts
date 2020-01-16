@@ -1,4 +1,4 @@
-import router from "../routes";
+import {max_days_to_book_ahead} from "../../config/config";
 
 export function getPrettyHour(hour: number, showAmPm: boolean = false): string {
   let amOrPm = showAmPm ? (hour >= 12 ? ' PM' : ' AM') : '';
@@ -38,6 +38,20 @@ export function formatDateAsYMD(date: Date): string {
   return [year, month, day].join('-');
 }
 
+export function formatIntDateAsYMD(intDay: number): string {
+  const today = new Date();
+  today.setTime(today.getTime() + intDay * 24 * 60 * 60 * 1000);
+
+  let month = '' + (today.getMonth() + 1),
+    day = '' + today.getDate(),
+    year = today.getFullYear();
+
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+
+  return [year, month, day].join('-');
+}
+
 export function getPrettyDay(intDay: number, fullString: boolean = false): string {
   const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
@@ -58,10 +72,8 @@ export function getPrettyDay(intDay: number, fullString: boolean = false): strin
 }
 
 export function getDateFromIntDayTime(intDay: number, time: number): string {
-  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-
   const today = new Date();
-  today.setTime(today.getTime() + (intDay + 1) * 24 * 60 * 60 * 1000);
+  today.setTime(today.getTime() + (intDay) * 24 * 60 * 60 * 1000);
   today.setHours(time);
 
   const month = (today.getMonth() < 10 ? '0' : '') + (today.getMonth() + 1).toString();
@@ -84,6 +96,29 @@ export function sanitiseTime(hour: number, checkMinutes: boolean = false): numbe
   }
 
   return testHour;
+}
+
+export function parseTimeStr(str: string, checkMinutes: boolean = false): number {
+  if (!str)
+    return null;
+
+  const d = new Date(str + '.000Z');
+
+  return checkMinutes ? sanitiseTime(d.getUTCHours(), checkMinutes) : d.getUTCHours();
+}
+
+export function getDibsDayStrFromIntDay(intDay: number): string {
+  if (intDay < 0 || intDay > max_days_to_book_ahead)
+    return null;
+
+  const today = new Date();
+
+  today.setTime(today.getTime() + intDay * 24 * 60 * 60 * 1000);
+
+  const month = (today.getMonth() + 1 < 10 ? '0' : '') + (today.getMonth() + 1).toString();
+  const day = (today.getDate() < 10 ? '0' : '') + (today.getDate()).toString();
+
+  return `${today.getFullYear()}-${month}-${day}`;
 }
 
 export function getCurrentHour() {
@@ -120,4 +155,12 @@ export function isValidTime(time: number, day: number = 0): boolean {
     return false;
 
   return true;
+}
+
+export function changePrettyDateToIntDay(date: string): number {
+  const utcDate = new Date(date);
+  const offsetDir = utcDate.getTimezoneOffset() > 0 ? 1 : -1;
+
+  utcDate.setTime(utcDate.getTime() + utcDate.getTimezoneOffset()*60*1000*offsetDir );
+  return getDaysFromToday(utcDate);
 }

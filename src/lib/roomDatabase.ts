@@ -1,5 +1,5 @@
 import { getNextValidHalfHour } from '../../models/roomDatabase';
-import { getDisabledRoomIDs } from '../../models/adminDatabase';
+// import { getDisabledRoomIDs } from '../../models/adminDatabase';
 import monk from 'monk';
 import { ExtendedRoom, Room, RoomFreeTable } from '../types/room';
 import { isValidTime } from './dateFuncs';
@@ -10,7 +10,7 @@ let db;
 if (env == 'dev') {
   db = monk('localhost:27017/roomDatabase');
 } else {
-  db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+  db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 }
 
 const roomDatabase = db.get('roomDatabase');
@@ -27,7 +27,6 @@ export async function getAllFreeNow() {
     out[data.Name].id = data.RoomID;
   });
 
-  console.log(data, 'out= ', out);
   return data;
 }
 
@@ -37,7 +36,8 @@ export async function getListOfRoomState(day: number, time: number, usrid: numbe
 
   const data = await roomDatabase.find({});
 
-  const disabledRooms = await getDisabledRoomIDs();
+  // const disabledRooms = await getDisabledRoomIDs();
+  const disabledRooms = [];
 
   for (const roomData of data) {
     const roomNum = roomData.Name.match(/\d+/)[0]; // get the number from the room
@@ -50,14 +50,14 @@ export async function getListOfRoomState(day: number, time: number, usrid: numbe
         room: roomData.Name,
         roomNum: mapRoomName,
         roomID: listRoomName,
-        Free: generateFreeTable(roomData.Free.last, 16),
+        Free: generateFreeTable(roomData.Free.length, 16),
         size: roomData.size,
         hasTV: roomData.tv,
         hasPhone: roomData.phone,
         id: roomData.RoomID,
         Picture: roomData.Picture
       });
-    } else if (time == -1) {
+    } else if (time == -1) {  // give us the free table for EVERY day
       listFree.push({
         room: roomData.Name,
         roomNum: mapRoomName,
@@ -147,7 +147,9 @@ export async function getFreeTableWithUserData(roomID: string, day: number = -1,
 }
 
 export async function getFreeTable(roomID: string, day: number = -1): Promise<RoomFreeTable[] | Array<RoomFreeTable[]>> { //gets the free table of the roomID for all days
-  const disabledRooms = await getDisabledRoomIDs();
+  // const disabledRooms = await getDisabledRoomIDs();
+  const disabledRooms = [];
+
   const roomData = await roomDatabase.find({ RoomID: roomID });
 
   if (roomData.length <= 0)
@@ -176,14 +178,14 @@ function createNewFreeTable(length: number, isFree: boolean): Array<RoomFreeTabl
   return newFreeTable;
 }
 
-export function generateFreeTable(days: number, dayLength: number): Array<Array<RoomFreeTable>> {
+export function generateFreeTable(days: number, dayLength: number, isFree: boolean = false): Array<Array<RoomFreeTable>> {
   const newFreeTable: Array<Array<RoomFreeTable>> = new Array(days);
   for (let j = 0; j < days; j++) {
     const curDay: Array<RoomFreeTable> = new Array(dayLength);
 
     for (let i = 0; i < dayLength; i++) {
       curDay[i] = {
-        free: false,
+        free: isFree,
         time: ((7 + i) >= 10 ? (7 + i) : '0' + (7 + i)) + ':30 - ' + ((8 + i) >= 10 ? (8 + i) : '0' + (8 + i)) + ':30',
         startTime: 7 + i,
         owner: 0,

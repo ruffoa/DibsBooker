@@ -1,5 +1,6 @@
 # DibsBooker / QBook
 This project is a fork of [QBook](https://github.com/essdev-team/dibs-wrapper), with an emphasis on allowing users to book rooms with the current D!bs system, bypassing the existing UI.
+A version of the project with the latest code changes is hosted [here](https://dibs-wrapper.herokuapp.com/), however this build may be buggy and unusable at any given time.
 
 ## Getting Started
 
@@ -30,7 +31,7 @@ Once this is done, all you have to do is type `npm run debug:windows` into CMD t
 
 ### Running Tests
 
-Automated tests are currently being created. Check the test folder for current progress or check back later. We are using Mocha as our testing framework and Chai as the assertion library.
+Automated tests are currently being created. Check the test folder for current progress or check back later. We are using Mocha as our testing framework and Sinon for sandboxing.
 
 Thanks to BrowserStack
 <a href="https://browserstack.com"> <img src="archive/Browserstack-logo.png" width="12%"> </a>

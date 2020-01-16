@@ -4,6 +4,7 @@ import { room_hour_limit } from "../../config/config";
 import { Room } from '../types/room';
 import { object } from 'prop-types';
 import { Quicky } from '../types/quick';
+import {UserInfo} from "../types/user";
 const passport = require('passport');
 
 export function getUserID(req): number {
@@ -19,6 +20,20 @@ export function getUserID(req): number {
         }
     }
     return usrid;
+}
+
+export function getUserInfo(req): UserInfo {
+    if (req.isAuthenticated()) {
+        try {
+            const user = req.user;
+            return { email: user.local.email, firstName: user.local.firstName, lastName: user.local.lastName, phoneNumber: user.local.phoneNumber };
+
+        } catch (exception) {
+            console.error("ERROR GETTING USER INFO: ", exception)
+        }
+    }
+
+    return null;
 }
 
 export function getAdminStatus(req): boolean {

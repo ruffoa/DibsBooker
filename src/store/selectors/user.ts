@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { StoreState } from '../../types/store';
-import { UserState } from '../../types/user';
+import {UserInfo, UserState} from '../../types/user';
 import { UserAccountType } from '../../types/enums/user';
 
 function getUser(state: StoreState): UserState {
@@ -15,4 +15,9 @@ export const selectIsLoggedIn = createSelector<StoreState, UserState, boolean>(
 export const selectIsAdmin = createSelector<StoreState, UserState, boolean>(
   [getUser],
   (userState: UserState): boolean => userState.accountType === UserAccountType.Admin
+);
+
+export const selectUserInfo = createSelector<StoreState, UserState, UserInfo>(
+  [getUser],
+  (userState: UserState): UserInfo => userState.userInfo
 );

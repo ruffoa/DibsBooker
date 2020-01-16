@@ -1,10 +1,10 @@
 import { StoreState } from '../types/store';
-import { selectCurrentHour, selectRoomData, selectTimeCount } from '../store/selectors/rooms';
-import { selectIsLoggedIn } from '../store/selectors/user';
+import {selectCurrentHour, selectDate, selectRoomData, selectTimeCount} from '../store/selectors/rooms';
+import {selectIsLoggedIn, selectUserInfo} from '../store/selectors/user';
 import { connect } from 'react-redux';
 import * as React from 'react';
 import { Room, RoomFreeTable } from '../types/room';
-import { getDaysFromToday, getPrettyDay, sanitiseTime } from '../lib/dateFuncs';
+import {changePrettyDateToIntDay, getDaysFromToday, getPrettyDay, sanitiseTime} from '../lib/dateFuncs';
 import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Grid, Typography } from '@material-ui/core';
 import { PhoneRounded, TvRounded } from '@material-ui/icons';
 import { GridItemWidths } from '../types/enums/grid';
@@ -12,6 +12,9 @@ import postReq from '../client/postReq';
 import SnackBar, { SnackBarVariant } from '../components/SnackBar';
 import { BookingResponseObject } from '../types/book';
 import { RouteComponentProps } from 'react-router';
+import {bookDibsRoom, bookMultipleDibsRoom} from "../store/actions/dibs";
+import {Dispatch} from "redux";
+import {UserInfo} from "../types/user";
 
 async function fetchData(roomID) {
   if (roomID) {
@@ -23,6 +26,7 @@ async function fetchData(roomID) {
 
 interface MatchParams {
   roomName: string;
+  date?: string;  // of type yyyy-mm-dd
 }
 
 interface Props extends RouteComponentProps<MatchParams> {
@@ -30,6 +34,10 @@ interface Props extends RouteComponentProps<MatchParams> {
   isLoggedIn: boolean;
   roomData: Array<Room>;
   day: string;
+  date: number;
+  bookDibsRoom: Dispatch;
+  bookMultipleDibsRooms: Dispatch;
+  userInfo: UserInfo;
 }
 
 interface State {
@@ -52,7 +60,7 @@ class Book extends React.Component<Props, State> {
 
     this.state = {
       alert: null,
-      day: this.props.day && getDaysFromToday(new Date(this.props.day)) || 0,
+      day: this.props.date || this.props.day && getDaysFromToday(new Date(this.props.day)) || this.props.match.params && this.props.match.params.date && changePrettyDateToIntDay(props.match.params.date) || 0,
       currentHour: sanitiseTime(this.props.currentHour || new Date().getHours(), true),
       response: [],
       selectedTimes: [],
@@ -91,17 +99,31 @@ class Book extends React.Component<Props, State> {
   }
 
   bookRoom = async () => {
-    const { selectedTimes, roomData, roomName, day } = this.state;
+    const { selectedTimes, roomData, roomName: stateRoomName, day } = this.state;
+    const { userInfo } = this.props;
 
     if (selectedTimes.length) {
       console.log('selectedTimes: ', selectedTimes.toString());
 
-      const roomName = roomData && roomData[0].room || roomName;
+      const roomName = roomData && roomData[0].room || stateRoomName;
       const serverResponse = await postReq('/bookroom', {
         times: selectedTimes,
         roomName,
-        day
+        day,
+        room: roomData && roomData[0],
+        userInfo
       }) as BookingResponseObject;
+
+      //  room: Room;
+      //   emailAddress: string;
+      //   firstName: string;
+      //   lastName: string;
+      //   phoneNumber?: string;
+      //   reservationLength: number;
+      //   startDate: number;
+      //   startTime: number;
+
+      // bookMultipleDibsRoom({ times: selectedTimes, day, room: roomData && roomData[0], userInfo });
       console.log('serverResponse: ', serverResponse);
 
       if (serverResponse.BookStatus) {
@@ -142,7 +164,6 @@ class Book extends React.Component<Props, State> {
     const { roomData } = this.state;
 
     console.log('logged in?: ', this.props.isLoggedIn);
-    console.log(this.props, this.state);
 
     await this.buildRoomData();
   }
@@ -166,13 +187,13 @@ class Book extends React.Component<Props, State> {
   }
 
   renderTimeButtons() {
-    const { day } = this.props;
+    const { day } = this.state;
     const { currentHour, selectedTimes, roomData } = this.state;
 
     if (!this.props.roomData || !this.props.roomData.length)
       return null;
 
-    const daysFromToday = day && getDaysFromToday(new Date(day)) || 0;
+    const daysFromToday = day && day || 0;
     const hourButtons = (roomData[0].Free[daysFromToday] as Array<RoomFreeTable>).length && (roomData[0].Free[daysFromToday] as Array<RoomFreeTable>).map((hour) => {
       if (hour.startTime < currentHour)
         return null;
@@ -191,7 +212,7 @@ class Book extends React.Component<Props, State> {
     return (
       <Grid item>
         <div className='section'>
-          <Grid container spacing={16}>
+          <Grid container spacing={2}>
             {hourButtons}
           </Grid>
         </div>
@@ -213,7 +234,7 @@ class Book extends React.Component<Props, State> {
         <Typography>
           {Description}
         </Typography>
-        <Grid container spacing={8}>
+        <Grid container spacing={1}>
           <Grid item>
             {hasTV && <TvRounded className="book__feature-icon" />}
           </Grid>
@@ -229,13 +250,12 @@ class Book extends React.Component<Props, State> {
   }
 
   render() {
-    const { day } = this.props;
+    const { day } = this.state;
     const { selectedTimes, roomData } = this.state;
 
     if (!roomData.length)
       return null;
 
-    console.log('room0', roomData[0], roomData);
     const { room: roomName, Picture } = roomData[0];
 
     return (
@@ -250,10 +270,10 @@ class Book extends React.Component<Props, State> {
               />
               <CardContent>
                 <Typography gutterBottom align={'center'} variant="h5" component="h2">
-                  Book {roomName} for {day || getPrettyDay(0, true)}
+                  Book {roomName} for {day && getPrettyDay(day, true) || getPrettyDay(0, true)}
                 </Typography>
                 {this.renderRoomInfo()}
-                <Grid container spacing={16} alignContent={'center'}>
+                <Grid container spacing={2} alignContent={'center'}>
                   {this.renderTimeButtons()}
                 </Grid>
               </CardContent>
@@ -273,13 +293,23 @@ class Book extends React.Component<Props, State> {
 
 }
 
+const mapDispatchToProps = dispatch => {
+  return {
+    bookDibsRoom: () => dispatch(bookDibsRoom),
+    bookMultipleDibsRooms: () => dispatch(bookMultipleDibsRoom),
+    dispatch
+  }
+};
+
 function mapStateToProps(state: StoreState) {
   return {
     roomData: selectRoomData(state),
     currentHour: selectCurrentHour(state),
+    date: selectDate(state),
     timeCount: selectTimeCount(state),
-    isLoggedIn: selectIsLoggedIn(state)
+    isLoggedIn: selectIsLoggedIn(state),
+    userInfo: selectUserInfo(state),
   };
 }
 
-export default connect(mapStateToProps)(Book);
+export default connect(mapStateToProps, mapDispatchToProps)(Book);

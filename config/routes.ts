@@ -53,12 +53,20 @@ export default function (app, passport) {
   app.post('/login', loginPage);
 
   // process the login form
-  app.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/accounts', // redirect to the secure profile section
-    failureRedirect: '/login', // redirect back to the signup page if there is an error
-    failureFlash: true, // allow flash messages
-    successFlash: true
-  }));
+  app.post('/login', (req, res, next) => {
+    // console.log("PASSPORT AUTH: ", req.query, req.originalUrl);
+
+    const query = req && req.query && req.query.redirect;
+    const redirectPath =  (query || '/accounts');
+    // console.log("PASSPORT AUTH: ", req.query, query, redirectPath);
+
+    passport.authenticate('local-login', {
+      successRedirect: redirectPath, // redirect to the secure profile section
+      failureRedirect: '/login', // redirect back to the signup page if there is an error
+      failureFlash: true, // allow flash messages
+      successFlash: true
+    })(req, res, next)
+  });
 
   // =====================================
   // Preferences ==============================

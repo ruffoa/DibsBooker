@@ -1,5 +1,5 @@
-var assert = require('chai').assert;
-var config = require('../../config/config');
+import 'assert';
+const config = require('../../config/config');
 
 describe('Config JS Constants Test', function () {
     describe('Room Booking Limit', function () {

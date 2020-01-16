@@ -4,18 +4,23 @@ import createStore from '../store/createStore';
 import renderAppToString from '../server/renderAppToString';
 
 import { getListOfRoomState } from '../lib/roomDatabase'; //the roomDatabase interface which provide 5 functions. Look in the file for how to use them
-import { getAdminStatus, getUserID } from '../lib/userFunctions';
-import { setAccountType, setLoggedIn } from '../store/actions/user';
+import {getAdminStatus, getUserID, getUserInfo} from '../lib/userFunctions';
+import {setAccountType, setLoggedIn, setUserInfo} from '../store/actions/user';
 import { compile } from '../server/compileSass';
 import { UserAccountType } from '../types/enums/user';
 import { getDaysFromToday } from '../lib/dateFuncs';
 import { getTimecount } from '../lib/roomBooking';
+import {getDibsBookingsForAllRooms} from "../lib/serverSideDibsFuncs";
+import {ExtendedRoom, Room} from "../types/room";
+import {UserInfo} from "../types/user";
+import {fetchDibsDataForSpecificDayIfNotPresent, getCacheOrDefault, getLatestDibsData} from "../lib/dibsPrefetcher";
 
 const express = require('express');
 const router = express.Router();
 
-async function createStoreInstance(req, data, current_hour, timeCount) {
+async function createStoreInstance(req, data, current_hour, timeCount, userInfo: UserInfo) {
   const store = createStore({});
+
   await store.dispatch(setRooms(data));
   await store.dispatch(setCurrentHour(current_hour));
   await store.dispatch(setTimeCount(timeCount));
@@ -23,6 +28,8 @@ async function createStoreInstance(req, data, current_hour, timeCount) {
   const accountType = getAdminStatus(req) ? UserAccountType.Admin : UserAccountType.Regular;
 
   await store.dispatch(setAccountType(accountType));
+  await store.dispatch(setUserInfo(userInfo));
+
   return store;
 }
 
@@ -40,9 +47,14 @@ router.get('/', async function (req, res, next) {
   const userid = getUserID(req);
 
   const listFree = await getListOfRoomState(day, -1, userid);
-  const timecount = getTimecount(day, userid, current_hour, listFree);
+  const cachedDibs = getLatestDibsData();
 
-  const store = await createStoreInstance(req, listFree, current_hour, timecount);
+  // console.log("CACHED DATA: ", cachedDibs);
+
+  const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
+  const timecount = getTimecount(day, userid, current_hour, dibsFree);
+
+  const store = await createStoreInstance(req, dibsFree, current_hour, timecount, getUserInfo(req));
   const context = {};
   const { html: body, css: MuiCss } = renderAppToString(req, context, store);
   const title = 'QBook';
@@ -88,12 +100,16 @@ router.post('/index', async function (req, res) {
     const usrid = getUserID(req);
 
     const listFree = await getListOfRoomState(daysFromToday, -1, usrid);
-    console.log('getting data for: ', daysFromToday, current_hour);
-    const timeCount = getTimecount(daysFromToday, usrid, 7, listFree);
+
+    const cachedDibs = await fetchDibsDataForSpecificDayIfNotPresent(daysFromToday);
+    const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
+
+    console.log('getting data for: ', daysFromToday, current_hour, listFree.length, dibsFree.length);
+    const timeCount = getTimecount(daysFromToday, usrid, 7, dibsFree);
     const prettyDate = formatDate(postDataDate);
 
     res.send({
-      list: listFree,
+      list: dibsFree,
       timeCount: timeCount,
       currentHour: current_hour,
       prettyDate: prettyDate,

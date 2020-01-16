@@ -6,7 +6,7 @@ let db;
 if (env == 'dev') {
   db = monk('localhost:27017/roomDatabase');
 } else {
-  db = monk('mongodb://heroku_08d6gg04:tbjjetli24bdv2nqrpiu6gdlta@ds153978.mlab.com:53978/heroku_08d6gg04');
+  db = monk('mongodb://heroku_qzc36wmm:v43ef6m8l71r0do13ckhjoqp2t@ds241308.mlab.com:41308/heroku_qzc36wmm');
 }
 
 const roomDatabase = db.get('roomDatabase');
@@ -290,7 +290,7 @@ export function getTimecount(day: number, userId: number, currentHour: number, l
 
   const startCheckHour = (currentHour < 7) ? 7 : currentHour;  // this is the hour (in 24 hour time) on which we start to check for the booking statuses, it'll go from n to 22h (where n >= 7 && n <= 22)
 
-  for (let i = startCheckHour - 7; i < listFree[i].Free[day].length; i++) {
+  for (let i = startCheckHour - 7; i < listFree[0].Free[day].length; i++) {
     const amOrPm = ((i + 7) >= 11) ? " PM" : " AM"; // i + 7 is back to being in 24h time, thus anything 11 or larger will be PM (since it's a 1h time slot starting on the half hour, eg: 11:30-12:30 PM)
     const startTime = (((i + 7) % 12 === 0) ? '12' : (i + 7) % 12) + ":30";
     const endTime = (((i + 7 + 1) % 12 === 0) ? '12' : (i + 7 + 1) % 12) + ":30";
@@ -325,8 +325,10 @@ export function getTimecount(day: number, userId: number, currentHour: number, l
     }
   }
 
-  for (let i = 0; i < timeCount.length; i++)
+  for (let i = 0; i < timeCount.length; i++) {
+    console.log("TIMECOUNT ", i, timeCount[i]);
     timeCount[i].totalFree = timeCount[i].totalCount - timeCount[i].hourCount;
+  }
 
   return timeCount;
 }

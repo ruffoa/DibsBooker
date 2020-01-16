@@ -20,3 +20,8 @@ export const selectTimeCount = createSelector<StoreState, RoomState, Array<TimeC
   [getRooms],
   (roomState: RoomState): Array<TimeCountObject> => roomState.timeCount
 );
+
+export const selectDate = createSelector<StoreState, RoomState, number>(
+  [getRooms],
+  (roomState: RoomState): number => roomState.date
+);

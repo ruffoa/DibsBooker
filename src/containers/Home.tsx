@@ -18,7 +18,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Link } from 'react-router-dom'
 import MaterialDatePicker from '../components/MaterialDatePicker';
 import postReq from '../client/postReq';
-import { sanitiseTime, getDaysFromToday } from '../lib/dateFuncs';
+import {sanitiseTime, getDaysFromToday, getPrettyDay, formatDateAsYMD, formatIntDateAsYMD} from '../lib/dateFuncs';
 
 async function fetchData(date, time) {
   const dateToSend = date || new Date();
@@ -120,7 +120,7 @@ class Home extends Component<Props, State> {
   renderTimeButtons() {
     const { roomData, selectedTime, prettyDate, intDay } = this.state;
     const dbTime = selectedTime - 7;
-    console.log(dbTime, roomData, selectedTime, prettyDate, intDay)
+    console.log(dbTime, roomData, selectedTime, prettyDate, intDay, this.state)
 
     const roomButtons = roomData && roomData.map((room) => {
       let className = 'nroom';
@@ -214,7 +214,7 @@ class Home extends Component<Props, State> {
 
   async onTimeChange(event) {
     const selectedValue = event.target.value;
-    const intVal = selectedValue !== '' ? parseInt(selectedValue) : null;
+    const intVal = selectedValue !== '' ? parseInt(selectedValue) : this.state.currentHour;
     const { selectedDate, roomData, intDay } = this.state;
 
     if (!roomData[0].Free[intDay]) {
@@ -228,7 +228,9 @@ class Home extends Component<Props, State> {
         timeCount: (res as RoomPostData).timeCount || this.state.timeCount
       });
     } else {
+
       this.setState({
+        selectedTime: intVal,
         currentHour: intDay === 0 ? sanitiseTime(new Date().getHours(), true) : this.state.currentHour
       });
     }
@@ -251,12 +253,14 @@ class Home extends Component<Props, State> {
       });
     } else {
       const res = await fetchData(date, selectedTime) as RoomPostData;
+      const intday = getDaysFromToday(date);
 
       this.setState({
         currentHour: res.currentHour,
-        intDay: getDaysFromToday(date),
+        intDay: intday,
         roomData: res.list || this.state.roomData,
-        timeCount: res.timeCount || this.state.timeCount
+        timeCount: res.timeCount || this.state.timeCount,
+        prettyDate: formatIntDateAsYMD(intday)
       });
     }
 

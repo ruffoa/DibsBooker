@@ -1,4 +1,4 @@
-const assert = require('chai').assert;
+import 'assert';
 const database = require('../../config/database');
 
 describe('Database URL Test', function() {

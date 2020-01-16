@@ -15,9 +15,12 @@ router.get('/login', function (req, res, next) {
     hasMsg = (msgTxt.length > 0) ? true : false;
   }
 
+  const query = req.query && req.query.redirect || null;
+
   res.render('login', {    // render the page with server side variables passed to the client
     message: msg[0],
-    hasMsg: hasMsg
+    hasMsg: hasMsg,
+    query: !!query && `?redirect=${query}` || ''
   });
 
 });

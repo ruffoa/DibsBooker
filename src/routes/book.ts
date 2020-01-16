@@ -1,7 +1,7 @@
 import template from '../server/template';
 import createStore from '../store/createStore';
-import { setCurrentHour, setRooms, setTimeCount } from '../store/actions/rooms';
-import { setLoggedIn } from '../store/actions/user';
+import {setCurrentHour, setDate, setRooms, setTimeCount} from '../store/actions/rooms';
+import {setLoggedIn, setUserInfo} from '../store/actions/user';
 import renderAppToString from '../server/renderAppToString';
 import { compile } from '../server/compileSass';
 import { Room } from '../types/room';
@@ -9,7 +9,10 @@ import { getFreeTable, getInfoByName, getListOfRoomState } from '../lib/roomData
 import { getDaysFromToday } from '../lib/dateFuncs';
 import { getInfo } from '../../models/roomDatabase';
 import { getTimecount } from '../lib/roomBooking';
-import { getUserID } from '../lib/userFunctions';
+import {getUserID, getUserInfo} from '../lib/userFunctions';
+import {UserInfo} from "../types/user";
+import {getDibsBookingsForAllRooms} from "../lib/serverSideDibsFuncs";
+import {fetchDibsDataForSpecificDayIfNotPresent, getCacheOrDefault} from "../lib/dibsPrefetcher";
 
 const express = require('express');
 const router = express.Router();
@@ -21,12 +24,15 @@ function addDays(date, days) {
   return result;
 }
 
-async function createStoreInstance(req, data, current_hour, timeCount) {
+async function createStoreInstance(req, data, current_hour, timeCount, userInfo: UserInfo, date) {
   const store = createStore({});
   await store.dispatch(setRooms(data));
   await store.dispatch(setCurrentHour(current_hour));
   await store.dispatch(setTimeCount(timeCount));
   await store.dispatch(setLoggedIn(req.isAuthenticated()));
+  await store.dispatch(setUserInfo(userInfo));
+  await store.dispatch(setDate(date));
+
   return store;
 }
 
@@ -47,20 +53,22 @@ router.get('/book-v2/:roomName/', async function (req, res, next) {
 
   const roomID = roomInfo.roomID;
   const roomFreeTable = await getFreeTable(roomID);
-  const usrid = accountFuncs.getUserID(req);
+  const userid = accountFuncs.getUserID(req);
+
   const imgID = room.replace(/\s+/g, '') + '.jpg';
-  roomInfo.userId = usrid;
+  roomInfo.userId = userid;
   roomInfo.Free = roomFreeTable;
   roomInfo.Picture = '/img/' + imgID;
   roomInfo.day = 0;
 
   const themeColors = req.colors;
 
-  const userid = getUserID(req);
-  const listFree = await getListOfRoomState(day, -1, userid);
-  const timecount = getTimecount(day, userid, current_hour, listFree);
+  const listFree = await getListOfRoomState(day, -1, userid); // gives back data for EVERY day if -1 for time
+  const cachedDibs = await fetchDibsDataForSpecificDayIfNotPresent(day);  // day is hardcoded to 0
+  const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
+  const timecount = getTimecount(day, userid, current_hour, dibsFree.payload);
 
-  const store = await createStoreInstance(req, listFree, current_hour, timecount);
+  const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req), day);
   const context = {};
   const { html: body, css: MuiCss } = renderAppToString(req, context, store);
   const title = `QBook - Book ${roomInfo.room} for ${dateObj.toDateString()}`;
@@ -106,14 +114,18 @@ router.get('/book-v2/:roomName/:date', async function (req, res, next) {
     res.status(404).send(message);
   }
 
+  console.log("THE DATE IS: ", diff, date);
   const roomInfo: Room = await getInfoByName(room);
   if (!roomInfo) { // invalid room, the user specified an invalid room, so we will show the 404 page
     // do nothing here, and end the "render" call
     return null;
   }
 
-  const listFree = await getListOfRoomState(day, -1, userid);
-  const timecount = getTimecount(day, userid, current_hour, listFree);
+  const listFree = await getListOfRoomState(day, -1, userid); // gives back for all days, so date passed is irrelevant
+
+  const cachedDibs = await fetchDibsDataForSpecificDayIfNotPresent(diff);
+  const dibsFree = await getCacheOrDefault(cachedDibs, listFree);
+  const timecount = getTimecount(diff, userid, current_hour, dibsFree.payload);
 
   const roomID = roomInfo.roomID;
   const roomFreeTable = await getFreeTable(roomID);
@@ -122,14 +134,14 @@ router.get('/book-v2/:roomName/:date', async function (req, res, next) {
   roomInfo.userId = usrid;
   roomInfo.Free = roomFreeTable;
   roomInfo.Picture = '/img/' + imgID;
-  roomInfo.day = 0;
+  roomInfo.day = diff;
 
   const themeColors = req.colors;
 
-  const store = await createStoreInstance(req, listFree, current_hour, timecount);
+  const store = await createStoreInstance(req, listFree, current_hour, timecount, getUserInfo(req), diff);
   const context = {};
   const { html: body, css: MuiCss } = renderAppToString(req, context, store);
-  const title = `QBook - Book ${roomInfo.room} for ${dateObj.toDateString()}`;
+  const title = `QBook - Book ${roomInfo.room} for ${date.toDateString()}`;
   const theme = req.theme === 'custom' ? false : req.theme || 'default';
   const cssPath = [`/CSS/room-style/${theme}-room-style.css`];
   const compiledCss = compile('src/SCSS/main.scss');
