@@ -26,6 +26,7 @@ async function fetchData(roomID) {
 
 interface MatchParams {
   roomName: string;
+  date?: string;  // of type yyyy-mm-dd
 }
 
 interface Props extends RouteComponentProps<MatchParams> {
@@ -59,7 +60,7 @@ class Book extends React.Component<Props, State> {
 
     this.state = {
       alert: null,
-      day: this.props.date || this.props.day && getDaysFromToday(new Date(this.props.day)) || 0,
+      day: this.props.date || this.props.day && getDaysFromToday(new Date(this.props.day)) || this.props.match.params && this.props.match.params.date && getDaysFromToday(new Date(props.match.params.date)) || 0,
       currentHour: sanitiseTime(this.props.currentHour || new Date().getHours(), true),
       response: [],
       selectedTimes: [],
@@ -186,13 +187,13 @@ class Book extends React.Component<Props, State> {
   }
 
   renderTimeButtons() {
-    const { day } = this.props;
+    const { day } = this.state;
     const { currentHour, selectedTimes, roomData } = this.state;
 
     if (!this.props.roomData || !this.props.roomData.length)
       return null;
 
-    const daysFromToday = day && getDaysFromToday(new Date(day)) || 0;
+    const daysFromToday = day && day || 0;
     const hourButtons = (roomData[0].Free[daysFromToday] as Array<RoomFreeTable>).length && (roomData[0].Free[daysFromToday] as Array<RoomFreeTable>).map((hour) => {
       if (hour.startTime < currentHour)
         return null;
@@ -249,7 +250,7 @@ class Book extends React.Component<Props, State> {
   }
 
   render() {
-    const { day } = this.props;
+    const { day } = this.state;
     const { selectedTimes, roomData } = this.state;
 
     if (!roomData.length)
@@ -269,7 +270,7 @@ class Book extends React.Component<Props, State> {
               />
               <CardContent>
                 <Typography gutterBottom align={'center'} variant="h5" component="h2">
-                  Book {roomName} for {day || getPrettyDay(0, true)}
+                  Book {roomName} for {day && getPrettyDay(day, true) || getPrettyDay(0, true)}
                 </Typography>
                 {this.renderRoomInfo()}
                 <Grid container spacing={2} alignContent={'center'}>
